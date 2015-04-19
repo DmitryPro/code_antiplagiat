@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <deque>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -59,7 +60,7 @@ void deleteComments() {
 
 void insertSpaces() {
 	for (size_t i = 0; i < text.size(); i++) {
-		string newLine = "";
+		string newLine = " ";
 		for (size_t j = 0; j < text[i].length(); j++) {
 			if (! ( ((text[i][j] >= '0') && (text[i][j] <= '9')) ||
 					((text[i][j] >= 'a') && (text[i][j] <= 'z')) ||
@@ -73,7 +74,7 @@ void insertSpaces() {
 			else
 				newLine += text[i][j];
 		}
-		text[i] = newLine;
+		text[i] = newLine + " ";
 	}
 }
 
@@ -90,23 +91,27 @@ void deleteSpaces() {
 		}
 		else {
 			string newLine = "";
-			newLine += text[i][0];
-			
-			for (size_t j = 1; j < text[i].length(); j++) {
-				if (! ((text[i][j] == ' ' || text[i][j] == '\t') &&
-					   (text[i][j - 1] == ' ' || text[i][j - 1] == '\t')) ) {
-					if (text[i][j] == '\t')
-						newLine += ' ';
-					else
-						newLine += text[i][j];
-				}
-			}
+			istringstream in(text[i]);
+			string word;
+			while (in >> word)
+				newLine += word + " ";
 			text[i] = newLine;
 		}
 	}
 }
 					
-				
+void formatText() {	
+	deleteComments();
+	insertSpaces();
+	deleteSpaces();
+}	
+
+long long hashFunction(string s) {
+	long long hash = 0;
+	for (size_t i = 0; i < s.length(); i++)	
+		hash = (hash * 257 + s[i]) % 1000000007;
+	return hash;
+}
 
 int main() { 
 
@@ -114,12 +119,13 @@ int main() {
 	readText(fin);
 	fin.close();
 	
-	deleteComments();
-	insertSpaces();
-	deleteSpaces();
+	formatText();
 	
+	string oneLineText = "";
 	for (size_t i = 0; i < text.size(); i++)
-		cout << text[i] << endl;
+		oneLineText += text[i];
+	
+	cout << oneLineText;
 	
 	return 0;
 }
