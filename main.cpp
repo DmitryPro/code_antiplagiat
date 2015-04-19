@@ -160,7 +160,7 @@ int main() {
             for (int j = 0; j < n; j++)
                 if (was.find(j) == was.end()) {
                     int len = lcs(fingerprints[p], fingerprints[j]);
-                    if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.8) {
+                    if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.9) {
                         same.push_back(j);
                         q.push_back(j);
                     }
