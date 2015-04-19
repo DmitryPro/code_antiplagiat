@@ -85,6 +85,8 @@ void deleteSpaces() {
 		}
 		else {
 			string newLine = "";
+			newLine += text[i][0];
+			
 			for (size_t j = 1; j < text[i].length(); j++) {
 				if (! (text[i][j] == ' ' && text[i][j - 1] == ' '))
 					newLine += text[i][j];
