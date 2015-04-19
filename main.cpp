@@ -48,11 +48,23 @@ bool isIdentifier(const string& word) {
     return flag;
 }
 
+bool isNumber(const string& word) {
+    bool flag = true;
+    for (size_t i = 0; i < word.length(); i++)
+        if (!(((word[i] >= '0') && (word[i] <= '9')) ||
+              ((word[i] >= 'a') && (word[i] <= 'z')) ||
+              ((word[i] >= 'A') && (word[i] <= 'Z')) ||
+              word[i] == '_'))
+            flag = false;
+    if (!((word[0] >= '0') && (word[0] <= '9')))
+        flag = false;
+    return flag;
+}
+
 void renameIdentifiers(string& oneLineText, const set<string>& keywords) {
     istringstream in(oneLineText);
 
-    string newLine = "";
-    ostringstream out(newLine);
+    ostringstream out;
 
     int count = 0;
     string word;
@@ -64,6 +76,26 @@ void renameIdentifiers(string& oneLineText, const set<string>& keywords) {
     }
 
     oneLineText = out.str();
+}
+
+string makeFingerprint(const string& oneLineText, const set<string>& keywords) {
+    istringstream in(oneLineText);
+
+    ostringstream out;
+
+    string word;
+    while (in >> word) {
+        if (keywords.find(word) != keywords.end())
+            out << 'k';
+        else if (isIdentifier(word))
+            out << 'i';
+        else if (isNumber(word))
+            out << 'n';
+        else
+            out << word;
+    }
+
+    return out.str();
 }
 
 int main() {
@@ -78,11 +110,12 @@ int main() {
 	for (size_t i = 0; i < text.size(); i++)
 		oneLineText += text[i];
 
-	cout << hashFunction(oneLineText) << endl;
-
+	int h1 = hashFunction(oneLineText);
     renameIdentifiers(oneLineText, keywords);
-    cout << oneLineText << endl;
-
+    int h2 = hashFunction(oneLineText);
+    string fingerprint = makeFingerprint(oneLineText, keywords);
+    int h3 = hashFunction(fingerprint);
+    cout << fingerprint << endl;
 
 	return 0;
 }
