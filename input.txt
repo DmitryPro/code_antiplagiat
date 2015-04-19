@@ -1,12 +1,3 @@
-#include <iostream>
-
-using namespace std;
-
-int main() {
-	printf("Hello World!\n");  // This is output
-	/*
-	cout << "Hello World!";
-	*/
-	cout << 2 * /*(1 + 3) */ 17;
-	return 0;
-}
+2
+z.cpp
+m.cpp
