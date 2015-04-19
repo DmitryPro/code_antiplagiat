@@ -103,7 +103,7 @@ int lcs(const string& a, const string& b) {
 
 int main() {
 
-    ifstream fin("01/input.txt");
+    ifstream fin("input.txt");
 
     int n;
     fin >> n;
@@ -124,7 +124,7 @@ int main() {
     for (int i = 0; i < n; i++) {
         vector<string> text;
 
-        fin.open(("01/" + fileNames[i]).c_str());
+        fin.open((fileNames[i]).c_str());
         readText(fin, text);
         fin.close();
 
@@ -147,7 +147,6 @@ int main() {
         if (was.find(i) != was.end())
             continue;
 
-        same.push_back(i);
         q.push_back(i);
         while (q.size()) {
             int p = q.back();
@@ -156,14 +155,13 @@ int main() {
             if (was.find(p) != was.end())
                 continue;
             was.insert(p);
+            same.push_back(p);
 
             for (int j = 0; j < n; j++)
                 if (was.find(j) == was.end()) {
                     int len = lcs(fingerprints[p], fingerprints[j]);
-                    if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.9) {
-                        same.push_back(j);
+                    if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.9)
                         q.push_back(j);
-                    }
                 }
         }
 
@@ -171,12 +169,14 @@ int main() {
             ans.push_back(same);
     }
 
-    cout << ans.size() << endl;
+    ofstream fout("output.txt");
+    fout << ans.size() << endl;
     for (size_t i = 0; i < ans.size(); i++) {
         for (int j = 0; j < ans[i].size(); j++)
-            cout << fileNames[ans[i][j]] << ' ';
-        cout << endl;
+            fout << fileNames[ans[i][j]] << ' ';
+        fout << endl;
     }
+    fout.close();
 
 	return 0;
 }
