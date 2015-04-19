@@ -79,7 +79,12 @@ void insertSpaces() {
 
 void deleteSpaces() {
 	for (size_t i = 0; i < text.size(); i++) {
-		if (text[i] == "") {
+		bool isEmpty = true;
+		for (size_t j = 0; j < text[i].length(); j++)
+			if (text[i][j] != ' ' && text[i][j] != '\t')
+				isEmpty = false;
+	
+		if (isEmpty) {
 			text.erase(text.begin() + i);
 			i--;
 		}
@@ -88,8 +93,13 @@ void deleteSpaces() {
 			newLine += text[i][0];
 			
 			for (size_t j = 1; j < text[i].length(); j++) {
-				if (! (text[i][j] == ' ' && text[i][j - 1] == ' '))
-					newLine += text[i][j];
+				if (! ((text[i][j] == ' ' || text[i][j] == '\t') &&
+					   (text[i][j - 1] == ' ' || text[i][j - 1] == '\t')) ) {
+					if (text[i][j] == '\t')
+						newLine += ' ';
+					else
+						newLine += text[i][j];
+				}
 			}
 			text[i] = newLine;
 		}
@@ -108,7 +118,7 @@ int main() {
 	insertSpaces();
 	deleteSpaces();
 	
-	for (int i = 0; i < text.size(); i++)
+	for (size_t i = 0; i < text.size(); i++)
 		cout << text[i] << endl;
 	
 	return 0;
