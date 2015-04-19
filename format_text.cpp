@@ -1,22 +1,42 @@
 #include "format_text.h"
 
+void deleteDirectives(vector<string>& text) {
+    for (size_t i = 0; i < text.size(); i++) {
+		istringstream in(text[i]);
+		string word;
+		in >> word;
+		if (word[0] == '#')
+            text[i] = "";
+    }
+}
+
+void deleteTypedefs(vector<string>& text) {
+    for (size_t i = 0; i < text.size(); i++) {
+		istringstream in(text[i]);
+		string word;
+		in >> word;
+		if (word == "typedef")
+            text[i] = "";
+    }
+}
+
 void deleteComments(vector<string>& text) {
 	bool flag = false;
 	size_t beginLine, beginPos;
-	
+
 	for (size_t i = 0; i < text.size(); i++) {
 		for (size_t j = 1; j < text[i].length(); j++) {
 			if (!flag) {
 				if (text[i][j - 1] == '/' && text[i][j] == '/')
-					text[i].erase(j - 1, text[i].length() - (j - 1));	
+					text[i].erase(j - 1, text[i].length() - (j - 1));
 			}
-				
+
 			if (text[i][j - 1] == '/' && text[i][j] == '*') {
 				flag = true;
 				beginLine = i;
 				beginPos = j - 1;
 			}
-			
+
 			if (text[i][j - 1] == '*' && text[i][j] == '/') {
 				flag = false;
 				if (i == beginLine) {
@@ -61,7 +81,7 @@ void deleteSpaces(vector<string>& text) {
 		for (size_t j = 0; j < text[i].length(); j++)
 			if (text[i][j] != ' ' && text[i][j] != '\t')
 				isEmpty = false;
-	
+
 		if (isEmpty) {
 			text.erase(text.begin() + i);
 			i--;
@@ -76,9 +96,11 @@ void deleteSpaces(vector<string>& text) {
 		}
 	}
 }
-					
-void formatText(vector<string>& text) {	
+
+void formatText(vector<string>& text) {
 	deleteComments(text);
+	deleteDirectives(text);
+	deleteTypedefs(text);
 	insertSpaces(text);
 	deleteSpaces(text);
 }

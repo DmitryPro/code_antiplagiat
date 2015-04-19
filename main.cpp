@@ -98,10 +98,22 @@ int lcs(const string& a, const string& b) {
             if (a[i - 1] == b[j - 1])
                 dp[i * m + j] = max(dp[i * m + j], dp[(i - 1) * m + (j - 1)] + 1);
         }
-    return dp[n * m - 1];
+    int ans = dp[n * m - 1];
+    delete[] dp;
+
+    return ans;
 }
 
 int main() {
+
+    /*vector<string> text;
+    ifstream fin("HelloWorld.cpp");
+    readText(fin, text);
+    fin.close();
+
+    formatText(text);
+    for (int i = 0; i < text.size(); i++)
+        cout << text[i] << endl;*/
 
     ifstream fin("input.txt");
 
@@ -137,7 +149,7 @@ int main() {
         renameIdentifiers(oneLineText, keywords);
         fingerprints[i] = makeFingerprint(oneLineText, keywords);
     }
-
+//return 0;
     set<int> was;
     vector< vector< int > > ans;
     for (int i = 0; i < n; i++) {
@@ -159,8 +171,17 @@ int main() {
 
             for (int j = 0; j < n; j++)
                 if (was.find(j) == was.end()) {
-                    int len = lcs(fingerprints[p], fingerprints[j]);
-                    if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.9)
+                    //int len = lcs(fingerprints[p], fingerprints[j]);
+                    //if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.9)
+                    //    q.push_back(j);
+
+                    string a, b;
+                    a = fingerprints[p];
+                    b = fingerprints[j];
+                    a.erase(0, a.length() / 10);
+                    b.erase(0, b.length() / 10);
+                    int len = lcs(a, b);
+                    if (len >= min(a.length(), b.length()) * 0.97)
                         q.push_back(j);
                 }
         }
