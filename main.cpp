@@ -23,97 +23,75 @@ long long hashFunction(const string& s) {
 	return hash;
 }
 
-bool isIdentifier(const string& word) {
-    bool flag = true;
-    for (size_t i = 0; i < word.length(); i++)
-        if (!(((word[i] >= '0') && (word[i] <= '9')) ||
-              ((word[i] >= 'a') && (word[i] <= 'z')) ||
-              ((word[i] >= 'A') && (word[i] <= 'Z')) ||
-              word[i] == '_'))
-            flag = false;
-    if ((word[0] >= '0') && (word[0] <= '9'))
-        flag = false;
-    return flag;
-}
+int lcs(const vector<int>& a, const vector<int>& b) {
+    int n = a.size() + 1;
+    int m = b.size() + 1;
 
-bool isNumber(const string& word) {
-    bool flag = true;
-    for (size_t i = 0; i < word.length(); i++)
-        if (!(((word[i] >= '0') && (word[i] <= '9')) ||
-              ((word[i] >= 'a') && (word[i] <= 'z')) ||
-              ((word[i] >= 'A') && (word[i] <= 'Z')) ||
-              word[i] == '_'))
-            flag = false;
-    if (!((word[0] >= '0') && (word[0] <= '9')))
-        flag = false;
-    return flag;
-}
+    int* dp[2];
+    dp[0] = new int[m];
+    dp[1] = new int[m];
+    memset(dp[0], 0, sizeof(int) * m);
 
-void renameIdentifiers(string& oneLineText, const set<string>& keywords) {
-    istringstream in(oneLineText);
-
-    ostringstream out;
-
-    int count = 0;
-    string word;
-    while (in >> word) {
-        if (keywords.find(word) == keywords.end() && isIdentifier(word))
-            out << "ID" << count++ << " ";
-        else
-            out << word << " ";
-    }
-
-    oneLineText = out.str();
-}
-
-string makeFingerprint(const string& oneLineText, const set<string>& keywords) {
-    istringstream in(oneLineText);
-
-    ostringstream out;
-
-    string word;
-    while (in >> word) {
-        if (keywords.find(word) != keywords.end())
-            out << 'k';
-        else if (isIdentifier(word))
-            out << 'i';
-        else if (isNumber(word))
-            out << 'n';
-        else
-            out << word;
-    }
-
-    return out.str();
-}
-
-int lcs(const string& a, const string& b) {
-    int n = a.length() + 1;
-    int m = b.length() + 1;
-    int* dp = new int[n * m];
-    memset(dp, 0, sizeof(int) * n * m);
-
-    for (int i = 1; i < n; i++)
-        for (int j = 1; j < m; j++) {
-            dp[i * m + j] = max(dp[(i - 1) * m + j], dp[i * m + (j - 1)]);
+    for (int i = 1; i < n; ++i) {
+        dp[1][0] = 0;
+        for (int j = 1; j < m; ++j) {
             if (a[i - 1] == b[j - 1])
-                dp[i * m + j] = max(dp[i * m + j], dp[(i - 1) * m + (j - 1)] + 1);
+                dp[1][j] = dp[0][j - 1] + 1;
+            else
+                dp[1][j] = max(dp[0][j], dp[1][j - 1]);
         }
-    int ans = dp[n * m - 1];
-    delete[] dp;
+        memcpy(dp[0], dp[1], sizeof(int) * m);
+    }
+    int ans = dp[0][m - 1];
+
+    delete[] dp[0];
+    delete[] dp[1];
 
     return ans;
 }
 
+set<int> makeFingerprint(vector<int> hashSequence) {
+    vector<int> hashes;
+    set<int> fingerprint;
+
+    int width = 5;
+    for (int i = 0; i < hashSequence.size() - width + 1; i++) {
+        long long hash = 0;
+        for (int j = 0; j < width; j++)
+            hash = (hash * 257 + hashSequence[i + j]) % 1000000007;
+        hashes.push_back(hash);
+    }
+
+    width = 20;
+    for (int i = 0; i < hashes.size() - width + 1; i++) {
+        int minHash = hashes[i];
+        for (int j = 0; j < width; j++)
+            minHash = min(minHash, hashes[i + j]);
+        fingerprint.insert(minHash);
+    }
+
+    return fingerprint;
+}
+
 int main() {
 
-    /*vector<string> text;
-    ifstream fin("HelloWorld.cpp");
+    /*ifstream fin;
+    set<string> keywords;
+
+	fin.open("keywords.txt");
+	readKeywords(fin, keywords);
+	fin.close();
+
+    vector<string> text;
+    fin.open("HelloWorld.cpp");
     readText(fin, text);
     fin.close();
 
-    formatText(text);
-    for (int i = 0; i < text.size(); i++)
-        cout << text[i] << endl;*/
+    vector<string> formattedText = formatText(text, keywords);
+    //for (int i = 0; i < formattedText.size(); i++)
+    //    cout << formattedText[i] << endl;
+
+    return 0;*/
 
     ifstream fin("input.txt");
 
@@ -131,60 +109,54 @@ int main() {
 	readKeywords(fin, keywords);
 	fin.close();
 
-    vector<string> fingerprints(n);
+    vector< vector<int> > hashSequences(n);
+    vector< set<int> > fingerprints(n);
 
     for (int i = 0; i < n; i++) {
         vector<string> text;
 
-        fin.open((fileNames[i]).c_str());
+        fin.open(("" + fileNames[i]).c_str());
         readText(fin, text);
         fin.close();
 
-        formatText(text);
-
-        string oneLineText = "";
-        for (size_t i = 0; i < text.size(); i++)
-            oneLineText += text[i];
-
-        renameIdentifiers(oneLineText, keywords);
-        fingerprints[i] = makeFingerprint(oneLineText, keywords);
+        vector<string> formattedText = formatText(text, keywords);
+        for (size_t j = 0; j < formattedText.size(); j++)
+            hashSequences[i].push_back(hashFunction(formattedText[j]));
+        fingerprints[i] = makeFingerprint(hashSequences[i]);
     }
-//return 0;
-    set<int> was;
+
+    set<int> used;
     vector< vector< int > > ans;
     for (int i = 0; i < n; i++) {
-        vector<int> q;
         vector<int> same;
 
-        if (was.find(i) != was.end())
+        if (used.find(i) != used.end())
             continue;
 
-        q.push_back(i);
-        while (q.size()) {
-            int p = q.back();
-            q.pop_back();
+        used.insert(i);
+        same.push_back(i);
 
-            if (was.find(p) != was.end())
-                continue;
-            was.insert(p);
-            same.push_back(p);
+        for (int j = i + 1; j < n; j++)
+            if (used.find(j) == used.end()) {
+                vector<int>& a = hashSequences[i];
+                vector<int>& b = hashSequences[j];
 
-            for (int j = 0; j < n; j++)
-                if (was.find(j) == was.end()) {
-                    //int len = lcs(fingerprints[p], fingerprints[j]);
-                    //if (len >= min(fingerprints[p].length(), fingerprints[j].length()) * 0.9)
-                    //    q.push_back(j);
+                int len = lcs(a, b);
+                bool firstEuristic = len >= min(a.size(), b.size()) * 0.85;
 
-                    string a, b;
-                    a = fingerprints[p];
-                    b = fingerprints[j];
-                    a.erase(0, a.length() / 10);
-                    b.erase(0, b.length() / 10);
-                    int len = lcs(a, b);
-                    if (len >= min(a.length(), b.length()) * 0.97)
-                        q.push_back(j);
+                set<int>& f1 = fingerprints[i];
+                set<int>& f2 = fingerprints[j];
+                int count = 0;
+                for (set<int>::iterator it = f1.begin(); it != f1.end(); it++)
+                    if (f2.find(*it) != f2.end())
+                        count++;
+                bool secondEuristic = count >= min(f1.size(), f2.size()) * 0.80;
+
+                if (firstEuristic && secondEuristic) {
+                    used.insert(j);
+                    same.push_back(j);
                 }
-        }
+            }
 
         if (same.size() > 1)
             ans.push_back(same);
