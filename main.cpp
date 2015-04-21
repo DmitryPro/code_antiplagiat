@@ -1,5 +1,10 @@
 #include "headers.h"
 
+double firstEuristicConst;
+double secondEuristicConst;
+int firstWidth;
+int secondWidth;
+
 void readText(istream& in, vector<string>& text) {
 	text.clear();
 
@@ -54,7 +59,7 @@ set<int> makeFingerprint(vector<int> hashSequence) {
     vector<int> hashes;
     set<int> fingerprint;
 
-    int width = 5;
+    int width = firstWidth;
     for (int i = 0; i < hashSequence.size() - width + 1; i++) {
         long long hash = 0;
         for (int j = 0; j < width; j++)
@@ -62,7 +67,7 @@ set<int> makeFingerprint(vector<int> hashSequence) {
         hashes.push_back(hash);
     }
 
-    width = 20;
+    width = secondWidth;
     for (int i = 0; i < hashes.size() - width + 1; i++) {
         int minHash = hashes[i];
         for (int j = 0; j < width; j++)
@@ -73,6 +78,7 @@ set<int> makeFingerprint(vector<int> hashSequence) {
     return fingerprint;
 }
 
+//int main(int argc, char* argv[]) {
 int main() {
 
     /*ifstream fin;
@@ -93,7 +99,19 @@ int main() {
 
     return 0;*/
 
-    ifstream fin("input.txt");
+    //string prefix = argv[1];
+    //sscanf(argv[2], "%lf", &firstEuristicConst);
+    //sscanf(argv[3], "%lf", &secondEuristicConst);
+    //sscanf(argv[4], "%d", &firstWidth);
+    //sscanf(argv[5], "%d", &secondWidth);
+
+    firstEuristicConst = 0.20831;
+    secondEuristicConst = 0.684671;
+    firstWidth = 6;
+    secondWidth = 31;
+    string prefix = "";
+
+    ifstream fin((prefix + "input.txt").c_str());
 
     int n;
     fin >> n;
@@ -115,7 +133,7 @@ int main() {
     for (int i = 0; i < n; i++) {
         vector<string> text;
 
-        fin.open(("" + fileNames[i]).c_str());
+        fin.open((prefix + fileNames[i]).c_str());
         readText(fin, text);
         fin.close();
 
@@ -136,21 +154,22 @@ int main() {
         used.insert(i);
         same.push_back(i);
 
+
         for (int j = i + 1; j < n; j++)
             if (used.find(j) == used.end()) {
-                vector<int>& a = hashSequences[i];
-                vector<int>& b = hashSequences[j];
+                vector<int> a = hashSequences[i];
+                vector<int> b = hashSequences[j];
 
                 int len = lcs(a, b);
-                bool firstEuristic = len >= min(a.size(), b.size()) * 0.85;
+                bool firstEuristic = len >= min(a.size(), b.size()) * firstEuristicConst;
 
-                set<int>& f1 = fingerprints[i];
-                set<int>& f2 = fingerprints[j];
+                set<int> f1 = fingerprints[i];
+                set<int> f2 = fingerprints[j];
                 int count = 0;
                 for (set<int>::iterator it = f1.begin(); it != f1.end(); it++)
                     if (f2.find(*it) != f2.end())
                         count++;
-                bool secondEuristic = count >= min(f1.size(), f2.size()) * 0.80;
+                bool secondEuristic = count >= min(f1.size(), f2.size()) * secondEuristicConst;
 
                 if (firstEuristic && secondEuristic) {
                     used.insert(j);
@@ -162,7 +181,7 @@ int main() {
             ans.push_back(same);
     }
 
-    ofstream fout("output.txt");
+    ofstream fout((prefix + "output.txt").c_str());
     fout << ans.size() << endl;
     for (size_t i = 0; i < ans.size(); i++) {
         for (int j = 0; j < ans[i].size(); j++)
