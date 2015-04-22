@@ -12,6 +12,8 @@
 #include <deque>
 #include <fstream>
 #include <sstream>
+#include <functional>
+#include <unordered_map>
 
 #include "format_text.h"
 

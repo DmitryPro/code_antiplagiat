@@ -121,6 +121,7 @@ library
 list
 long
 loop
+main
 malloc
 math
 map
@@ -174,12 +175,14 @@ register
 reinterpret_cast
 reintroduce
 repeat
+reverse
 resident
 resourcestring
 return
 scanf
 set
 setq
+sort
 shl
 short
 shr
@@ -188,6 +191,7 @@ sizeof
 static
 static_assert
 static_cast
+std
 stdcall
 stdio
 stdlib

@@ -1,9 +1,11 @@
 #include "headers.h"
 
-double firstEuristicConst;
-double secondEuristicConst;
-int firstWidth;
-int secondWidth;
+double firstHeuristicsConst;
+double secondHeuristicsConst;
+double thirdHeuristicsConst;
+int firstWidthConst;
+int secondWidthConst;
+int minLengthConst;
 
 void readText(istream& in, vector<string>& text) {
 	text.clear();
@@ -22,10 +24,139 @@ void readKeywords(istream& in, set<string>& keywords) {
 }
 
 long long hashFunction(const string& s) {
-	long long hash = 0;
-	for (size_t i = 0; i < s.length(); i++)
-		hash = (hash * 257 + s[i]) % 1000000007;
-	return hash;
+    hash<string> hf;
+    return hf(s);
+}
+
+long long hashFunction(const vector<int>& v) {
+    unsigned int Hash = 0;
+    for(int i = 0; i < v.size(); i++)
+        Hash = (Hash * 1664525) + v[i] + 1013904223;
+    return Hash % 1000000007;
+}
+
+set<int> makeFingerprint(vector<int> hashSequence) {
+    vector<int> hashes;
+    set<int> fingerprint;
+    int width;
+
+    width = firstWidthConst;
+    for (int i = 0; i < hashSequence.size() - width + 1; i++) {
+        vector<int> subsequence;
+        for (int j = 0; j < width; j++)
+            subsequence.push_back(hashSequence[i + j]);
+        hashes.push_back(hashFunction(subsequence));
+    }
+
+    width = secondWidthConst;
+    for (int i = 0; i < hashes.size() - width + 1; i++) {
+        int minHash = hashes[i];
+        for (int j = 0; j < width; j++)
+            minHash = min(minHash, hashes[i + j]);
+        fingerprint.insert(minHash);
+    }
+
+    return fingerprint;
+}
+
+void createHashTable(const vector<int>& a, const vector<int>& b, int l,
+                     vector< unordered_map< int, vector<int> > >& hashTable) {
+    int p = 1000000007;
+    int q = 1664525;
+
+    long long power = 1;
+    for (int i = 0; i < l; i++)
+        power = power * q % p;
+
+    long long Hash;
+
+    Hash = 0;
+    for (int i = 0; i < l; i++)
+        Hash = (Hash * q + a[i]) % p;
+    hashTable[0][Hash].push_back(0);
+
+    for (int i = l; i < a.size(); i++) {
+        Hash = (Hash * q + a[i]) % p;
+        Hash = (Hash - a[i - l] * power) % p;
+        Hash = (Hash + p) % p;
+        hashTable[0][Hash].push_back(i - l + 1);
+    }
+
+    Hash = 0;
+    for (int i = 0; i < l; i++)
+        Hash = (Hash * q + b[i]) % p;
+    hashTable[1][Hash].push_back(0);
+
+    for (int i = l; i < b.size(); i++) {
+        Hash = (Hash * q + b[i]) % p;
+        Hash = (Hash - b[i - l] * power) % p;
+        Hash = (Hash + p) % p;
+        hashTable[1][Hash].push_back(i - l + 1);
+    }
+}
+
+int commonPrefixLength(const vector<int>& a, const vector<int>& b,
+                       const vector< vector<bool> >& marked, int i, int j) {
+    int prefixLength = 0;
+    while (i < a.size() && j < b.size() && a[i] == b[j] && !marked[0][i] && !marked[1][j]) {
+        i++;
+        j++;
+        prefixLength++;
+    }
+    return prefixLength;
+}
+
+void mark(vector< vector<bool> >& marked, int i, int j, int length) {
+    for (int k = 0; k < length; k++)
+        marked[0][i + k] = marked[1][j + k] = true;
+}
+
+int gst(const vector<int>& a, const vector<int>& b) {
+    int commonPartLength = 0;
+    int minLength = minLengthConst;
+
+    vector< vector<bool> > marked(2);
+    marked[0] = vector<bool>(a.size(), false);
+    marked[1] = vector<bool>(b.size(), false);
+
+    int l = (min(a.size(), b.size()) + minLength) / 2;
+    while (true) {
+        vector< unordered_map< int, vector<int> > > hashTable(2);
+        createHashTable(a, b, l, hashTable);
+
+        int maxMatch = 0;
+        vector< pair<int, int> > matches;
+
+        for (auto it : hashTable[0]) {
+            for (int i : it.second)
+                for (int j : hashTable[1][it.first]) {
+                    int prefixLength = commonPrefixLength(a, b, marked, i, j);
+                    if (prefixLength > minLength)
+                        if (prefixLength > maxMatch) {
+                            maxMatch = prefixLength;
+                            matches.clear();
+                            matches.push_back(make_pair(i, j));
+                        }
+                        else if (prefixLength == maxMatch)
+                            matches.push_back(make_pair(i, j));
+
+                }
+        }
+
+        for (auto it : matches)
+            if (commonPrefixLength(a, b, marked, it.first, it.second) == maxMatch) {
+                mark(marked, it.first, it.second, maxMatch);
+                commonPartLength += maxMatch;
+            }
+
+        if (matches.size() == 0) {
+            if (l == minLength)
+                break;
+            l = (l + minLength) / 2;
+        }
+    }
+
+    return commonPartLength;
 }
 
 int lcs(const vector<int>& a, const vector<int>& b) {
@@ -55,31 +186,25 @@ int lcs(const vector<int>& a, const vector<int>& b) {
     return ans;
 }
 
-set<int> makeFingerprint(vector<int> hashSequence) {
-    vector<int> hashes;
-    set<int> fingerprint;
-
-    int width = firstWidth;
-    for (int i = 0; i < hashSequence.size() - width + 1; i++) {
-        long long hash = 0;
-        for (int j = 0; j < width; j++)
-            hash = (hash * 257 + hashSequence[i + j]) % 1000000007;
-        hashes.push_back(hash);
-    }
-
-    width = secondWidth;
-    for (int i = 0; i < hashes.size() - width + 1; i++) {
-        int minHash = hashes[i];
-        for (int j = 0; j < width; j++)
-            minHash = min(minHash, hashes[i + j]);
-        fingerprint.insert(minHash);
-    }
-
-    return fingerprint;
+bool firstHeuristics(const vector<int>& a, const vector<int>& b) {
+    int len = lcs(a, b);
+    return 1.0L * len / (a.size() + b.size() - len) > firstHeuristicsConst;
 }
 
-//int main(int argc, char* argv[]) {
-int main() {
+bool secondHeuristics(const set<int>& a, const set<int>& b) {
+    int count = 0;
+    for (set<int>::iterator it = a.begin(); it != a.end(); it++)
+        if (b.find(*it) != b.end())
+            count++;
+    return 1.0L * count / (a.size() + b.size() - count) > secondHeuristicsConst;
+}
+
+bool thirdHeuristics(const vector<int>& a, const vector<int>& b) {
+    int len = gst(a, b);
+    return 1.0L * len / (a.size() + b.size() - len) > thirdHeuristicsConst;
+}
+
+int main(int argc, char* argv[]) {
 
     /*ifstream fin;
     set<string> keywords;
@@ -89,7 +214,7 @@ int main() {
 	fin.close();
 
     vector<string> text;
-    fin.open("HelloWorld.cpp");
+    fin.open("38121.cpp");
     readText(fin, text);
     fin.close();
 
@@ -99,16 +224,20 @@ int main() {
 
     return 0;*/
 
-    //string prefix = argv[1];
-    //sscanf(argv[2], "%lf", &firstEuristicConst);
-    //sscanf(argv[3], "%lf", &secondEuristicConst);
-    //sscanf(argv[4], "%d", &firstWidth);
-    //sscanf(argv[5], "%d", &secondWidth);
+    /*string prefix = argv[1];
+    sscanf(argv[2], "%lf", &firstHeuristicsConst);
+    sscanf(argv[3], "%lf", &secondHeuristicsConst);
+    sscanf(argv[4], "%lf", &thirdHeuristicsConst);
+    sscanf(argv[5], "%d", &firstWidthConst);
+    sscanf(argv[6], "%d", &secondWidthConst);
+    sscanf(argv[7], "%d", &minLengthConst);*/
 
-    firstEuristicConst = 0.20831;
-    secondEuristicConst = 0.684671;
-    firstWidth = 6;
-    secondWidth = 31;
+    firstHeuristicsConst = 0.55;
+    secondHeuristicsConst = 0.55;
+    thirdHeuristicsConst = 0.55;
+    firstWidthConst = 4;
+    secondWidthConst = 13;
+    minLengthConst = 14;
     string prefix = "";
 
     ifstream fin((prefix + "input.txt").c_str());
@@ -137,8 +266,8 @@ int main() {
         readText(fin, text);
         fin.close();
 
-        vector<string> formattedText = formatText(text, keywords);
-        for (size_t j = 0; j < formattedText.size(); j++)
+        vector<string> formattedText = formatText(text, fileNames[i], keywords);
+        for (size_t j = formattedText.size() * 0; j < formattedText.size(); j++)
             hashSequences[i].push_back(hashFunction(formattedText[j]));
         fingerprints[i] = makeFingerprint(hashSequences[i]);
     }
@@ -154,24 +283,12 @@ int main() {
         used.insert(i);
         same.push_back(i);
 
-
         for (int j = i + 1; j < n; j++)
             if (used.find(j) == used.end()) {
-                vector<int> a = hashSequences[i];
-                vector<int> b = hashSequences[j];
+                if (firstHeuristics(hashSequences[i], hashSequences[j]) &&
+                    secondHeuristics(fingerprints[i], fingerprints[j]) &&
+                    thirdHeuristics(hashSequences[i], hashSequences[j])) {
 
-                int len = lcs(a, b);
-                bool firstEuristic = len >= min(a.size(), b.size()) * firstEuristicConst;
-
-                set<int> f1 = fingerprints[i];
-                set<int> f2 = fingerprints[j];
-                int count = 0;
-                for (set<int>::iterator it = f1.begin(); it != f1.end(); it++)
-                    if (f2.find(*it) != f2.end())
-                        count++;
-                bool secondEuristic = count >= min(f1.size(), f2.size()) * secondEuristicConst;
-
-                if (firstEuristic && secondEuristic) {
                     used.insert(j);
                     same.push_back(j);
                 }
@@ -188,6 +305,7 @@ int main() {
             fout << fileNames[ans[i][j]] << ' ';
         fout << endl;
     }
+
     fout.close();
 
 	return 0;

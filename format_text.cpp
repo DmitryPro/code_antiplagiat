@@ -1,5 +1,22 @@
 #include "format_text.h"
 
+Languages determineLanguage(string fileName) {
+    fileName.erase(0, fileName.find('.') + 1);
+    if (fileName == "cpp")
+        return CPP;
+    if (fileName == "java");
+        return JAVA;
+    if (fileName == "c")
+        return C;
+    if (fileName == "py")
+        return PY;
+    if (fileName == "pas")
+        return PAS;
+    if (fileName == "cs")
+        return CS;
+    return EXOTIC;
+}
+
 bool isIdentifier(const string& word) {
     bool flag = true;
     for (size_t i = 0; i < word.length(); i++)
@@ -24,6 +41,16 @@ bool isNumber(const string& word) {
     if (!((word[0] >= '0') && (word[0] <= '9')))
         flag = false;
     return flag;
+}
+
+void deleteStrangeSymbols(vector<string>& text) {
+    for (size_t i = 0; i < text.size(); i++) {
+       string newLine = "";
+       for (size_t j = 0; j < text[i].size(); j++)
+            if (32 <= text[i][j] && 128 > text[i][j])
+                newLine += text[i][j];
+        text[i] = newLine;
+    }
 }
 
 void deleteDirectives(vector<string>& text) {
@@ -157,7 +184,7 @@ void deleteSpaces(vector<string>& text) {
 	for (size_t i = 0; i < text.size(); i++) {
 		bool isEmpty = true;
 		for (size_t j = 0; j < text[i].length(); j++)
-			if (text[i][j] != ' ' && text[i][j] != '\t')
+			if (text[i][j] != ' ' && text[i][j] != '\t' && text[i][j] != '\n' && text[i][j] != '\r')
 				isEmpty = false;
 
 		if (isEmpty) {
@@ -201,29 +228,37 @@ void replaceNames(vector<string>& text, const string& a, const string& b) {
             text[i].replace(text[i].find(a), a.length(), b);
 }
 
-vector<string> formatText(vector<string> text, const set<string>& keywords) {
+vector<string> formatText(vector<string> text, string fileName, const set<string>& keywords) {
+    Languages l = determineLanguage(fileName);
+
 	deleteComments(text);
-	deleteDirectives(text);
+	if (l == CPP || l == C || l == CS)
+        deleteDirectives(text);
+
+	deleteStrangeSymbols(text);
 
 	insertSpaces(text);
 	deleteSpaces(text);
 
-	replaceNames(text, " unsigned long long ", " int ");
-	replaceNames(text, " unsigned long int ",  " int ");
-	replaceNames(text, " long int ",           " int ");
-	replaceNames(text, " long long ",          " int ");
-	replaceNames(text, " unsigned int ",       " int ");
-	replaceNames(text, " unsigned long ",      " int ");
-	replaceNames(text, " unsigned ",           " int ");
-	replaceNames(text, " long ",               " int ");
-	replaceNames(text, " short ",              " int ");
-	replaceNames(text, " size_t ",             " int ");
-	replaceNames(text, " char ",               " int ");
-	replaceNames(text, " bool ",               " int ");
-	replaceNames(text, " float ",           " double ");
-	replaceNames(text, " long double ",     " double ");
+    if (l == CPP || l == JAVA || l == CS || l == C) {
+        replaceNames(text, " unsigned long long ", " int ");
+        replaceNames(text, " unsigned long int ",  " int ");
+        replaceNames(text, " long int ",           " int ");
+        replaceNames(text, " long long ",          " int ");
+        replaceNames(text, " unsigned int ",       " int ");
+        replaceNames(text, " unsigned long ",      " int ");
+        replaceNames(text, " unsigned ",           " int ");
+        replaceNames(text, " long ",               " int ");
+        replaceNames(text, " short ",              " int ");
+        replaceNames(text, " size_t ",             " int ");
+        //replaceNames(text, " char ",               " int ");
+        //replaceNames(text, " bool ",               " int ");
+        replaceNames(text, " float ",           " double ");
+        replaceNames(text, " long double ",     " double ");
+    }
 
-	deleteTypedefs(text);
+    if (l == CPP || l == C)
+        deleteTypedefs(text);
 
 	deleteBraces(text);
     deleteSemicolons(text);
@@ -231,6 +266,7 @@ vector<string> formatText(vector<string> text, const set<string>& keywords) {
     deleteSpaces(text);
 
 	vector<string> formattedText;
+	//ofstream fout("output.txt");
     for (size_t i = 0; i < text.size(); i++) {
 		istringstream in(text[i]);
 		string word;
@@ -238,7 +274,7 @@ vector<string> formatText(vector<string> text, const set<string>& keywords) {
             if (keywords.find(word) != keywords.end())
                 formattedText.push_back(word);
             else if (isNumber(word)) {
-                istringstream in(word);
+                /*istringstream in(word);
                 double num;
                 in >> num;
 
@@ -246,15 +282,18 @@ vector<string> formatText(vector<string> text, const set<string>& keywords) {
                 out.setf(ios::scientific);
                 out << num;
 
-                formattedText.push_back(out.str());
+                formattedText.push_back(out.str());*/
+                formattedText.push_back(word);
             }
             else if (isIdentifier(word))
                 formattedText.push_back("id");
             else
                 formattedText.push_back(word);
-            //cout << formattedText.back() << " ";
+
+
+            //fout << formattedText.back() << " ";
         }
-        //cout << endl;
+        //fout << endl;
     }
 
     return formattedText;
