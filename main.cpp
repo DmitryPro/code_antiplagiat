@@ -578,7 +578,7 @@ ofstream fout("output.txt");
     secondWidthConst = 6;
     minLengthConst = 10;
     string prefix = "";
-    //string prefix = "test/04/";
+    //string prefix = "test/02/";
 
     double startTime = clock();
 

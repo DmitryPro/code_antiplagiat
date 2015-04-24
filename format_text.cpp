@@ -4,7 +4,7 @@ Languages determineLanguage(string fileName) {
     fileName.erase(0, fileName.find('.') + 1);
     if (fileName == "cpp")
         return CPP;
-    if (fileName == "java");
+    if (fileName == "java")
         return JAVA;
     if (fileName == "c")
         return C;
@@ -276,8 +276,14 @@ vector<Function> findFunctions(string& text, const set<string>& typewords) {
                 f.body = "";
                 s = BRACE_3;
             }
+            else if (word == "throws") {
+                while (word != "{")
+                    in >> word;
+                s = BRACE_3;
+            }
             else if (word != "try")
                 s = START;
+
             break;
         case BRACE_3:
             if (word == "}") {
@@ -369,7 +375,7 @@ vector<string> formatText(vector<string> text, string fileName,
 
     addTypewords(oneLineText, typewords);
 
-    if (l == CPP || l == C) {
+    if (l == CPP || l == C || l == JAVA) {
         vector<Function> functions = findFunctions(oneLineText, typewords);
         vector<bool> used = findUsedFunctions(functions);
 
