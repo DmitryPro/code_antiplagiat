@@ -14,6 +14,8 @@
 #include <sstream>
 #include <functional>
 #include <unordered_map>
+#include <time.h>
+//#include <omp.h>
 
 #include "format_text.h"
 

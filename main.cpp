@@ -3,6 +3,7 @@
 double firstHeuristicsConst;
 double secondHeuristicsConst;
 double thirdHeuristicsConst;
+double fourthHeuristicsConst;
 int firstWidthConst;
 int secondWidthConst;
 int minLengthConst;
@@ -11,47 +12,326 @@ void readText(istream& in, vector<string>& text) {
 	text.clear();
 
 	string s;
-	while (getline(in, s))
+	while (getline(in, s)) {
+        for (size_t i = 0; i < s.length();)
+            if (s[i] < 32)
+                s.erase(i, 1);
+            else
+                i++;
 		text.push_back(s);
+    }
 }
 
-void readKeywords(istream& in, set<string>& keywords) {
+void readKeywords(set<string>& keywords) {
     keywords.clear();
 
-	string s;
-	while (in >> s)
-		keywords.insert(s);
+    keywords.insert("False");
+    keywords.insert("None");
+    keywords.insert("True");
+    keywords.insert("absolute");
+    keywords.insert("abstract");
+    keywords.insert("alignas");
+    keywords.insert("alignof");
+    keywords.insert("pair");
+    keywords.insert("and");
+    keywords.insert("and_eq");
+    keywords.insert("apply");
+    keywords.insert("array");
+    keywords.insert("as");
+    keywords.insert("asm");
+    keywords.insert("assembler");
+    keywords.insert("assert");
+    keywords.insert("at");
+    keywords.insert("atom");
+    keywords.insert("auto");
+    keywords.insert("automated");
+    keywords.insert("begin");
+    keywords.insert("bitand");
+    keywords.insert("bitor");
+    keywords.insert("bool");
+    keywords.insert("boolean");
+    keywords.insert("break");
+    keywords.insert("byte");
+    keywords.insert("calloc");
+    keywords.insert("car");
+    keywords.insert("case");
+    keywords.insert("catch");
+    keywords.insert("cdecl");
+    keywords.insert("cdr");
+    keywords.insert("char");
+    keywords.insert("char16_t");
+    keywords.insert("char32_t");
+    keywords.insert("cin");
+    keywords.insert("cout");
+    keywords.insert("class");
+    keywords.insert("compl");
+    keywords.insert("cond");
+    keywords.insert("cons");
+    keywords.insert("const");
+    keywords.insert("const_cast");
+    keywords.insert("constexpr");
+    keywords.insert("constructor");
+    keywords.insert("continue");
+    keywords.insert("data");
+    keywords.insert("decltype");
+    keywords.insert("def");
+    keywords.insert("default");
+    keywords.insert("defun");
+    keywords.insert("del");
+    keywords.insert("delete");
+    keywords.insert("deriving");
+    keywords.insert("destructor");
+    keywords.insert("dispid");
+    keywords.insert("dispinterface");
+    keywords.insert("div");
+    keywords.insert("do");
+    keywords.insert("double");
+    keywords.insert("downto");
+    keywords.insert("dynamic");
+    keywords.insert("dynamic_cast");
+    keywords.insert("elif");
+    keywords.insert("else");
+    keywords.insert("end");
+    keywords.insert("enum");
+    keywords.insert("eq");
+    keywords.insert("eql");
+    keywords.insert("equal");
+    keywords.insert("equalp");
+    keywords.insert("eval");
+    keywords.insert("except");
+    keywords.insert("explicit");
+    keywords.insert("export");
+    keywords.insert("exports");
+    keywords.insert("extends");
+    keywords.insert("extern");
+    keywords.insert("external");
+    keywords.insert("false");
+    keywords.insert("far");
+    keywords.insert("file");
+    keywords.insert("final");
+    keywords.insert("finalization");
+    keywords.insert("finally");
+    keywords.insert("float");
+    keywords.insert("for");
+    keywords.insert("forall");
+    keywords.insert("foreign");
+    keywords.insert("format");
+    keywords.insert("forward");
+    keywords.insert("free");
+    keywords.insert("friend");
+    keywords.insert("funcall");
+    keywords.insert("function");
+    keywords.insert("global");
+    keywords.insert("goto");
+    keywords.insert("hiding");
+    keywords.insert("if");
+    keywords.insert("implementation");
+    keywords.insert("implements");
+    keywords.insert("import");
+    keywords.insert("in");
+    keywords.insert("include");
+    keywords.insert("index");
+    keywords.insert("infix");
+    keywords.insert("infixl");
+    keywords.insert("infixr");
+    keywords.insert("inherited");
+    keywords.insert("initialization");
+    keywords.insert("inline");
+    keywords.insert("instance");
+    keywords.insert("instanceof");
+    keywords.insert("int");
+    keywords.insert("interface");
+    keywords.insert("is");
+    keywords.insert("label");
+    keywords.insert("lambda");
+    keywords.insert("let");
+    keywords.insert("library");
+    keywords.insert("list");
+    keywords.insert("long");
+    keywords.insert("loop");
+    keywords.insert("main");
+    keywords.insert("malloc");
+    keywords.insert("math");
+    keywords.insert("map");
+    keywords.insert("mdo");
+    keywords.insert("message");
+    keywords.insert("mod");
+    keywords.insert("module");
+    keywords.insert("mutable");
+    keywords.insert("name");
+    keywords.insert("namespace");
+    keywords.insert("native");
+    keywords.insert("near");
+    keywords.insert("new");
+    keywords.insert("newtype");
+    keywords.insert("nil");
+    keywords.insert("nodefault");
+    keywords.insert("noexcept");
+    keywords.insert("nonlocal");
+    keywords.insert("not");
+    keywords.insert("not_eq");
+    keywords.insert("null");
+    keywords.insert("nullptr");
+    keywords.insert("object");
+    keywords.insert("of");
+    keywords.insert("on");
+    keywords.insert("operator");
+    keywords.insert("or");
+    keywords.insert("or_eq");
+    keywords.insert("out");
+    keywords.insert("overload");
+    keywords.insert("override");
+    keywords.insert("package");
+    keywords.insert("packed");
+    keywords.insert("pascal");
+    keywords.insert("pass");
+    keywords.insert("princ");
+    keywords.insert("printf");
+    keywords.insert("private");
+    keywords.insert("procedure");
+    keywords.insert("program");
+    keywords.insert("property");
+    keywords.insert("protected");
+    keywords.insert("public");
+    keywords.insert("published");
+    keywords.insert("qualified");
+    keywords.insert("raise");
+    keywords.insert("read");
+    keywords.insert("realloc");
+    keywords.insert("record");
+    keywords.insert("register");
+    keywords.insert("reinterpret_cast");
+    keywords.insert("reintroduce");
+    keywords.insert("repeat");
+    keywords.insert("reverse");
+    keywords.insert("resident");
+    keywords.insert("resourcestring");
+    keywords.insert("return");
+    keywords.insert("scanf");
+    keywords.insert("set");
+    keywords.insert("setq");
+    keywords.insert("sort");
+    keywords.insert("shl");
+    keywords.insert("short");
+    keywords.insert("shr");
+    keywords.insert("signed");
+    keywords.insert("sizeof");
+    keywords.insert("static");
+    keywords.insert("static_assert");
+    keywords.insert("static_cast");
+    keywords.insert("std");
+    keywords.insert("stdcall");
+    keywords.insert("stdio");
+    keywords.insert("stdlib");
+    keywords.insert("stored");
+    keywords.insert("strictfp");
+    keywords.insert("string");
+    keywords.insert("struct");
+    keywords.insert("super");
+    keywords.insert("switch");
+    keywords.insert("synchronized");
+    keywords.insert("template");
+    keywords.insert("then");
+    keywords.insert("this");
+    keywords.insert("thread_local");
+    keywords.insert("threadvar");
+    keywords.insert("throw");
+    keywords.insert("throws");
+    keywords.insert("transient");
+    keywords.insert("true");
+    keywords.insert("try");
+    keywords.insert("type");
+    keywords.insert("typedef");
+    keywords.insert("typeid");
+    keywords.insert("typename");
+    keywords.insert("union");
+    keywords.insert("unit");
+    keywords.insert("unless");
+    keywords.insert("unsigned");
+    keywords.insert("until");
+    keywords.insert("uses");
+    keywords.insert("using");
+    keywords.insert("var");
+    keywords.insert("vector");
+    keywords.insert("virtual");
+    keywords.insert("void");
+    keywords.insert("volatile");
+    keywords.insert("wchar_t");
+    keywords.insert("where");
+    keywords.insert("while");
+    keywords.insert("with");
+    keywords.insert("write");
+    keywords.insert("xor");
+    keywords.insert("xor_eq");
+    keywords.insert("yield");
 }
 
-long long hashFunction(const string& s) {
-    hash<string> hf;
-    return hf(s);
+void readTypewords(set<string>& typewords) {
+    typewords.clear();
+
+    typewords.insert("int");
+    typewords.insert("long");
+    typewords.insert("unsigned");
+    typewords.insert("void");
+    typewords.insert("char");
+    typewords.insert("bool");
+    typewords.insert("short");
+    typewords.insert("float");
+    typewords.insert("double");
+    typewords.insert("pair");
+    typewords.insert("const");
+    typewords.insert("size_t");
+    typewords.insert("wchar_t");
+    typewords.insert("vector");
+    typewords.insert("static");
+    typewords.insert("set");
+    typewords.insert("map");
+    typewords.insert("string");
+    typewords.insert("queue");
+    typewords.insert("deque");
+    typewords.insert("std");
+    typewords.insert(",");
+    typewords.insert(":");
+    typewords.insert("*");
+    typewords.insert("&");
+    typewords.insert("[");
+    typewords.insert("]");
+    typewords.insert("<");
+    typewords.insert(">");
+    typewords.insert("class");
+    typewords.insert("typename");
 }
 
 long long hashFunction(const vector<int>& v) {
-    unsigned int Hash = 0;
-    for(int i = 0; i < v.size(); i++)
-        Hash = (Hash * 1664525) + v[i] + 1013904223;
+    long long Hash = 0;
+    for(size_t i = 0; i < v.size(); i++)
+        Hash = ((Hash * 1664525) + v[i] + 1013904223) % 1000000007;
     return Hash % 1000000007;
 }
 
 set<int> makeFingerprint(vector<int> hashSequence) {
     vector<int> hashes;
     set<int> fingerprint;
-    int width;
+    size_t width;
 
     width = firstWidthConst;
-    for (int i = 0; i < hashSequence.size() - width + 1; i++) {
+    if (hashSequence.size() < width)
+        return set<int>();
+
+    for (size_t i = 0; i < hashSequence.size() - width + 1; i++) {
         vector<int> subsequence;
-        for (int j = 0; j < width; j++)
+        for (size_t j = 0; j < width; j++)
             subsequence.push_back(hashSequence[i + j]);
         hashes.push_back(hashFunction(subsequence));
     }
 
     width = secondWidthConst;
-    for (int i = 0; i < hashes.size() - width + 1; i++) {
+    if (hashes.size() < width)
+        return set<int>();
+
+    for (size_t i = 0; i < hashes.size() - width + 1; i++) {
         int minHash = hashes[i];
-        for (int j = 0; j < width; j++)
+        for (size_t j = 0; j < width; j++)
             minHash = min(minHash, hashes[i + j]);
         fingerprint.insert(minHash);
     }
@@ -61,8 +341,8 @@ set<int> makeFingerprint(vector<int> hashSequence) {
 
 void createHashTable(const vector<int>& a, const vector<int>& b, int l,
                      vector< unordered_map< int, vector<int> > >& hashTable) {
-    int p = 1000000007;
-    int q = 1664525;
+    long long p = 1000000007;
+    long long q = 1664525;
 
     long long power = 1;
     for (int i = 0; i < l; i++)
@@ -75,7 +355,7 @@ void createHashTable(const vector<int>& a, const vector<int>& b, int l,
         Hash = (Hash * q + a[i]) % p;
     hashTable[0][Hash].push_back(0);
 
-    for (int i = l; i < a.size(); i++) {
+    for (size_t i = l; i < a.size(); i++) {
         Hash = (Hash * q + a[i]) % p;
         Hash = (Hash - a[i - l] * power) % p;
         Hash = (Hash + p) % p;
@@ -87,7 +367,7 @@ void createHashTable(const vector<int>& a, const vector<int>& b, int l,
         Hash = (Hash * q + b[i]) % p;
     hashTable[1][Hash].push_back(0);
 
-    for (int i = l; i < b.size(); i++) {
+    for (size_t i = l; i < b.size(); i++) {
         Hash = (Hash * q + b[i]) % p;
         Hash = (Hash - b[i - l] * power) % p;
         Hash = (Hash + p) % p;
@@ -96,7 +376,7 @@ void createHashTable(const vector<int>& a, const vector<int>& b, int l,
 }
 
 int commonPrefixLength(const vector<int>& a, const vector<int>& b,
-                       const vector< vector<bool> >& marked, int i, int j) {
+                       const vector< vector<bool> >& marked, size_t i, size_t j) {
     int prefixLength = 0;
     while (i < a.size() && j < b.size() && a[i] == b[j] && !marked[0][i] && !marked[1][j]) {
         i++;
@@ -119,7 +399,7 @@ int gst(const vector<int>& a, const vector<int>& b) {
     marked[0] = vector<bool>(a.size(), false);
     marked[1] = vector<bool>(b.size(), false);
 
-    int l = (min(a.size(), b.size()) + minLength) / 2;
+    int l = (min(a.size(), b.size()) + 4 * minLength) / 5;
     while (true) {
         vector< unordered_map< int, vector<int> > > hashTable(2);
         createHashTable(a, b, l, hashTable);
@@ -131,7 +411,7 @@ int gst(const vector<int>& a, const vector<int>& b) {
             for (int i : it.second)
                 for (int j : hashTable[1][it.first]) {
                     int prefixLength = commonPrefixLength(a, b, marked, i, j);
-                    if (prefixLength > minLength)
+                    if (prefixLength > minLength) {
                         if (prefixLength > maxMatch) {
                             maxMatch = prefixLength;
                             matches.clear();
@@ -139,6 +419,7 @@ int gst(const vector<int>& a, const vector<int>& b) {
                         }
                         else if (prefixLength == maxMatch)
                             matches.push_back(make_pair(i, j));
+                    }
 
                 }
         }
@@ -152,7 +433,7 @@ int gst(const vector<int>& a, const vector<int>& b) {
         if (matches.size() == 0) {
             if (l == minLength)
                 break;
-            l = (l + minLength) / 2;
+            l = (l + 4 * minLength) / 5;
         }
     }
 
@@ -170,6 +451,7 @@ int lcs(const vector<int>& a, const vector<int>& b) {
 
     for (int i = 1; i < n; ++i) {
         dp[1][0] = 0;
+
         for (int j = 1; j < m; ++j) {
             if (a[i - 1] == b[j - 1])
                 dp[1][j] = dp[0][j - 1] + 1;
@@ -186,59 +468,119 @@ int lcs(const vector<int>& a, const vector<int>& b) {
     return ans;
 }
 
+vector<int> zf(const vector<int>& s) {
+    vector<int> z(s.size());
+    z[0] = 0;
+    for (int i = 1, l = 0, r = 0; i < s.size(); i++) {
+        if (i < r)
+            z[i] = min(r - i - 1, z[i - l]);
+        while (i + z[i] < s.size() && s[z[i]] == s[i + z[i]])
+            z[i]++;
+        if (i + z[i] > r) {
+            r = i + z[i];
+            l = i;
+        }
+    }
+    return z;
+}
+
+int tokenCompress(const vector<int>& a, const vector<int>& b = vector<int>()) {
+    vector<int> s = a;
+    s.push_back(-1);
+    s.insert(s.end(), b.begin(), b.end());
+    s.push_back(-2);
+
+    int length = 0;
+
+    for (size_t i = 0; i < a.size(); ) {
+        vector<int> z = zf(s);
+
+        int best = 0;
+        for (size_t j = a.size() - i + 1; j < s.size(); j++)
+            best = max(best, z[j]);
+
+        length += 3;
+        if (best > 2) {
+            i += best;
+            s.erase(s.begin(), s.begin() + best);
+            s.insert(s.end(), a.begin() + i, a.begin() + i + best);
+        }
+        else {
+            i++;
+            s.erase(s.begin());
+            s.push_back(a[i]);
+        }
+    }
+
+    return length;
+}
+
 bool firstHeuristics(const vector<int>& a, const vector<int>& b) {
+return true;
     int len = lcs(a, b);
-    return 1.0L * len / (a.size() + b.size() - len) > firstHeuristicsConst;
+    return ((double)len) / (a.size() + b.size() - len) > firstHeuristicsConst;
 }
 
 bool secondHeuristics(const set<int>& a, const set<int>& b) {
+//return true;
     int count = 0;
     for (set<int>::iterator it = a.begin(); it != a.end(); it++)
         if (b.find(*it) != b.end())
             count++;
-    return 1.0L * count / (a.size() + b.size() - count) > secondHeuristicsConst;
+    return ((double)count) / (a.size() + b.size() - count) > secondHeuristicsConst;
 }
 
 bool thirdHeuristics(const vector<int>& a, const vector<int>& b) {
+//return true;
     int len = gst(a, b);
-    return 1.0L * len / (a.size() + b.size() - len) > thirdHeuristicsConst;
+    return ((double)len) / (a.size() + b.size() - len) > thirdHeuristicsConst;
+}
+
+bool fourthHeuristics(const vector<int>& a, const vector<int>& b) {
+    vector<int> c = a;
+    c.insert(c.end(), b.begin(), b.end());
+    return (0.0L + tokenCompress(a) - tokenCompress(a, b)) / tokenCompress(c) > fourthHeuristicsConst;
 }
 
 int main(int argc, char* argv[]) {
 
     /*ifstream fin;
-    set<string> keywords;
 
-	fin.open("keywords.txt");
-	readKeywords(fin, keywords);
-	fin.close();
+    set<string> keywords;
+	readKeywords(keywords);
+	set<string> typewords;
+	readKeywords(typewords);
 
     vector<string> text;
-    fin.open("38121.cpp");
+    fin.open("test/05/8576.cpp");
     readText(fin, text);
     fin.close();
 
-    vector<string> formattedText = formatText(text, keywords);
-    //for (int i = 0; i < formattedText.size(); i++)
-    //    cout << formattedText[i] << endl;
+ofstream fout("output.txt");
+    vector<string> formattedText = formatText(text, "test/05/8576.cpp", keywords, typewords);
+    for (auto s : formattedText)
+        fout << s << ' ';
 
     return 0;*/
 
     /*string prefix = argv[1];
-    sscanf(argv[2], "%lf", &firstHeuristicsConst);
-    sscanf(argv[3], "%lf", &secondHeuristicsConst);
-    sscanf(argv[4], "%lf", &thirdHeuristicsConst);
+    sscanf(argv[2], "%lf", &secondHeuristicsConst);
+    sscanf(argv[3], "%lf", &thirdHeuristicsConst);
+    sscanf(argv[4], "%lf", &fourthHeuristicsConst);
     sscanf(argv[5], "%d", &firstWidthConst);
     sscanf(argv[6], "%d", &secondWidthConst);
     sscanf(argv[7], "%d", &minLengthConst);*/
 
-    firstHeuristicsConst = 0.55;
-    secondHeuristicsConst = 0.55;
-    thirdHeuristicsConst = 0.55;
-    firstWidthConst = 4;
-    secondWidthConst = 13;
-    minLengthConst = 14;
+    secondHeuristicsConst = 0.312893;
+    thirdHeuristicsConst = 0.326933;
+    fourthHeuristicsConst = 0.75;
+    firstWidthConst = 6;
+    secondWidthConst = 6;
+    minLengthConst = 10;
     string prefix = "";
+    //string prefix = "test/04/";
+
+    double startTime = clock();
 
     ifstream fin((prefix + "input.txt").c_str());
 
@@ -251,14 +593,16 @@ int main(int argc, char* argv[]) {
     fin.close();
 
     set<string> keywords;
+    set<string> typewords;
 
-	fin.open("keywords.txt");
-	readKeywords(fin, keywords);
-	fin.close();
+	readKeywords(keywords);
+    readTypewords(typewords);
 
     vector< vector<int> > hashSequences(n);
     vector< set<int> > fingerprints(n);
 
+    int count = 0;
+    map<string, int> dict;
     for (int i = 0; i < n; i++) {
         vector<string> text;
 
@@ -266,9 +610,12 @@ int main(int argc, char* argv[]) {
         readText(fin, text);
         fin.close();
 
-        vector<string> formattedText = formatText(text, fileNames[i], keywords);
-        for (size_t j = formattedText.size() * 0; j < formattedText.size(); j++)
-            hashSequences[i].push_back(hashFunction(formattedText[j]));
+        vector<string> formattedText = formatText(text, fileNames[i], keywords, typewords);
+        for (size_t j = 0; j < formattedText.size(); j++) {
+            if (dict.find(formattedText[j]) == dict.end())
+                dict[formattedText[j]] = count++;
+            hashSequences[i].push_back(dict[formattedText[j]]);
+        }
         fingerprints[i] = makeFingerprint(hashSequences[i]);
     }
 
@@ -285,10 +632,30 @@ int main(int argc, char* argv[]) {
 
         for (int j = i + 1; j < n; j++)
             if (used.find(j) == used.end()) {
-                if (firstHeuristics(hashSequences[i], hashSequences[j]) &&
-                    secondHeuristics(fingerprints[i], fingerprints[j]) &&
-                    thirdHeuristics(hashSequences[i], hashSequences[j])) {
+                //bool h1 = firstHeuristics(hashSequences[i], hashSequences[j]);
+                double currentTime = clock();
+                bool isPlagiat = false;
 
+                if ((currentTime - startTime) / CLOCKS_PER_SEC > 28)
+                    isPlagiat = secondHeuristics(fingerprints[i], fingerprints[j]);
+                else {
+                    bool h3 = thirdHeuristics(hashSequences[i], hashSequences[j]);
+                    if (!h3)
+                        isPlagiat = false;
+                    else {
+                        bool h2 = secondHeuristics(fingerprints[i], fingerprints[j]);
+                        if (h2)
+                            isPlagiat = true;
+                        else
+                            isPlagiat = false;
+                        /*else {
+                            bool h4 = fourthHeuristics(hashSequences[i], hashSequences[j]);
+                            isPlagiat = h4;
+                        }*/
+                    }
+                }
+
+                if (isPlagiat) {
                     used.insert(j);
                     same.push_back(j);
                 }
@@ -301,7 +668,7 @@ int main(int argc, char* argv[]) {
     ofstream fout((prefix + "output.txt").c_str());
     fout << ans.size() << endl;
     for (size_t i = 0; i < ans.size(); i++) {
-        for (int j = 0; j < ans[i].size(); j++)
+        for (size_t j = 0; j < ans[i].size(); j++)
             fout << fileNames[ans[i][j]] << ' ';
         fout << endl;
     }

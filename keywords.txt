@@ -5,6 +5,7 @@ absolute
 abstract
 alignas
 alignof
+pair
 and
 and_eq
 apply

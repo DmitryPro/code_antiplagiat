@@ -23,7 +23,7 @@ bool isIdentifier(const string& word) {
         if (!(((word[i] >= '0') && (word[i] <= '9')) ||
               ((word[i] >= 'a') && (word[i] <= 'z')) ||
               ((word[i] >= 'A') && (word[i] <= 'Z')) ||
-              word[i] == '_' || word[i] == '.'))
+              word[i] == '_'))
             flag = false;
     if ((word[0] >= '0') && (word[0] <= '9'))
         flag = false;
@@ -35,8 +35,7 @@ bool isNumber(const string& word) {
     for (size_t i = 0; i < word.length(); i++)
         if (!(((word[i] >= '0') && (word[i] <= '9')) ||
               ((word[i] >= 'a') && (word[i] <= 'z')) ||
-              ((word[i] >= 'A') && (word[i] <= 'Z')) ||
-              word[i] == '.'))
+              ((word[i] >= 'A') && (word[i] <= 'Z'))))
             flag = false;
     if (!((word[0] >= '0') && (word[0] <= '9')))
         flag = false;
@@ -167,8 +166,7 @@ void insertSpaces(vector<string>& text) {
 			if (! ( ((text[i][j] >= '0') && (text[i][j] <= '9')) ||
 					((text[i][j] >= 'a') && (text[i][j] <= 'z')) ||
 					((text[i][j] >= 'A') && (text[i][j] <= 'Z')) ||
-					text[i][j] == '_' || text[i][j] == '.'
-				  )) {
+					text[i][j] == '_')) {
 				newLine += " ";
 				newLine += text[i][j];
 				newLine += " ";
@@ -180,46 +178,29 @@ void insertSpaces(vector<string>& text) {
 	}
 }
 
-void deleteSpaces(vector<string>& text) {
-	for (size_t i = 0; i < text.size(); i++) {
-		bool isEmpty = true;
-		for (size_t j = 0; j < text[i].length(); j++)
-			if (text[i][j] != ' ' && text[i][j] != '\t' && text[i][j] != '\n' && text[i][j] != '\r')
-				isEmpty = false;
-
-		if (isEmpty) {
-			text.erase(text.begin() + i);
-			i--;
-		}
-		else {
-			string newLine = " ";
-			istringstream in(text[i]);
-			string word;
-			while (in >> word)
-				newLine += word + " ";
-			text[i] = newLine;
-		}
-	}
+void deleteSpaces(string& text) {
+    string newLine = " ";
+    istringstream in(text);
+    string word;
+    while (in >> word)
+        newLine += word + " ";
+    text = newLine;
 }
 
-void deleteBraces(vector<string>& text) {
-    for (size_t i = 0; i < text.size(); i++) {
-        string newLine = "";
-        for (size_t j = 0; j < text[i].length(); j++)
-            if (!(text[i][j] == '{' || text[i][j] == '}' || text[i][j] == '(' || text[i][j] == ')'))
-                newLine += text[i][j];
-        text[i] = newLine;
-	}
+void deleteBraces(string& text) {
+    string newLine = "";
+    for (size_t j = 0; j < text.length(); j++)
+        if (!(text[j] == '{' || text[j] == '}' || text[j] == '(' || text[j] == ')'))
+            newLine += text[j];
+    text = newLine;
 }
 
-void deleteSemicolons(vector<string>& text) {
-    for (size_t i = 0; i < text.size(); i++) {
-        string newLine = "";
-        for (size_t j = 0; j < text[i].length(); j++)
-            if (!(text[i][j] == ';'))
-                newLine += text[i][j];
-        text[i] = newLine;
-	}
+void deleteSemicolons(string& text) {
+    string newLine = "";
+    for (size_t j = 0; j < text.length(); j++)
+        if (!(text[j] == ';'))
+            newLine += text[j];
+    text = newLine;
 }
 
 void replaceNames(vector<string>& text, const string& a, const string& b) {
@@ -228,17 +209,142 @@ void replaceNames(vector<string>& text, const string& a, const string& b) {
             text[i].replace(text[i].find(a), a.length(), b);
 }
 
-vector<string> formatText(vector<string> text, string fileName, const set<string>& keywords) {
+void addTypewords(string& text, set<string>& typewords) {
+    istringstream in(text);
+    string word;
+    while (in >> word) {
+        if (word == "struct" || word == "class" || word == "enum") {
+            in >> word;
+            typewords.insert(word);
+        }
+    }
+}
+
+vector<Function> findFunctions(string& text, const set<string>& typewords) {
+    istringstream in(text);
+
+    vector<Function> functions;
+
+    States s = START;
+    Function f;
+    int balance = 0;
+
+    string word;
+    while (in >> word) {
+        switch (s) {
+        case FINISH:
+            s = START;
+        case START:
+            if (word == "main") {
+                f.begin = (int)in.tellg() - word.length();
+                f.name = "main";
+                s = NAME;
+            }
+            else if (typewords.find(word) != typewords.end()) {
+                f.begin = (int)in.tellg() - word.length();
+                s = TYPENAME;
+            }
+            break;
+        case TYPENAME:
+            if (typewords.find(word) == typewords.end()) {
+                if (isIdentifier(word)) {
+                    f.name = word;
+                    s = NAME;
+                }
+                else
+                    s = START;
+            }
+            break;
+        case NAME:
+            if (word == "(")
+                s = BRACE_1;
+            else
+                s = START;
+            break;
+        case BRACE_1:
+            if (word == ")") {
+                if (balance == 0)
+                    s = BRACE_2;
+                else
+                    balance--;
+            }
+            if (word == "(")
+                balance++;
+            break;
+        case BRACE_2:
+            if (word == "{") {
+                f.body = "";
+                s = BRACE_3;
+            }
+            else if (word != "try")
+                s = START;
+            break;
+        case BRACE_3:
+            if (word == "}") {
+                if (balance == 0) {
+                    f.end = in.tellg();
+                    functions.push_back(f);
+                    s = FINISH;
+                }
+                else
+                    balance--;
+            }
+            else if (word == "{")
+                balance++;
+            else
+                f.body += " " + word + " ";
+            break;
+        };
+    }
+    return functions;
+}
+
+vector<bool> findUsedFunctions(const vector<Function>& functions) {
+    map<string, int> dict;
+
+    for (size_t i = 0; i < functions.size(); i++)
+        dict[functions[i].name] = i;
+
+    if (dict.find("main") == dict.end())
+        return vector<bool>(functions.size(), true);
+
+    vector<bool> used(functions.size(), false);
+
+    vector<int> q;
+    q.push_back(dict["main"]);
+    used[dict["main"]] = true;
+
+    while (q.size()) {
+        int v = q.back();
+        q.pop_back();
+
+        istringstream in(functions[v].body);
+        string s;
+        while (in >> s)
+            if (dict.find(s) != dict.end())
+                if (!used[dict[s]]) {
+                    used[dict[s]] = true;
+                    q.push_back(dict[s]);
+                }
+    }
+
+    return used;
+}
+
+vector<string> formatText(vector<string> text, string fileName,
+                          const set<string>& keywords, set<string> typewords) {
     Languages l = determineLanguage(fileName);
 
 	deleteComments(text);
+
 	if (l == CPP || l == C || l == CS)
         deleteDirectives(text);
 
 	deleteStrangeSymbols(text);
 
 	insertSpaces(text);
-	deleteSpaces(text);
+	for (size_t i = 0; i < text.size(); i++)
+        deleteSpaces(text[i]);
 
     if (l == CPP || l == JAVA || l == CS || l == C) {
         replaceNames(text, " unsigned long long ", " int ");
@@ -251,49 +357,71 @@ vector<string> formatText(vector<string> text, string fileName, const set<string
         replaceNames(text, " long ",               " int ");
         replaceNames(text, " short ",              " int ");
         replaceNames(text, " size_t ",             " int ");
-        //replaceNames(text, " char ",               " int ");
-        //replaceNames(text, " bool ",               " int ");
         replaceNames(text, " float ",           " double ");
         replaceNames(text, " long double ",     " double ");
     }
-
     if (l == CPP || l == C)
         deleteTypedefs(text);
 
-	deleteBraces(text);
-    deleteSemicolons(text);
+    string oneLineText = "";
+	for (size_t i = 0; i < text.size(); i++)
+        oneLineText += text[i];
 
-    deleteSpaces(text);
+    addTypewords(oneLineText, typewords);
+
+    if (l == CPP || l == C) {
+        vector<Function> functions = findFunctions(oneLineText, typewords);
+        vector<bool> used = findUsedFunctions(functions);
+
+        int end = oneLineText.length();
+        for (int i = functions.size() - 1; i >= 0; i--) {
+            oneLineText.erase(functions[i].end, end - functions[i].end);
+            end = functions[i].begin;
+
+            if (!used[i])
+                oneLineText.erase(functions[i].begin, functions[i].end - functions[i].begin);
+        }
+        oneLineText.erase(0, end);
+
+        /*for (size_t i = 0; i < functions.size(); i++) {
+            vector<string> tmp(1, functions[i].body);
+
+            replaceNames(tmp, functions[i].name, "");
+            functions[i].body = tmp[0];
+
+            for (size_t j = 0; j < functions.size(); j++)
+                if (i != j) {
+                    vector<string> tmp(1, functions[j].body);
+                    replaceNames(tmp, functions[i].name, functions[i].body);
+                    functions[j].body = tmp[0];
+                }
+        }
+
+        oneLineText = "";
+        for (size_t i = 0; i < functions.size(); i++)
+            if (functions[i].name == "main")
+                oneLineText = functions[i].body;*/
+    }
+
+	deleteBraces(oneLineText);
+    deleteSemicolons(oneLineText);
+
+    deleteSpaces(oneLineText);
 
 	vector<string> formattedText;
-	//ofstream fout("output.txt");
-    for (size_t i = 0; i < text.size(); i++) {
-		istringstream in(text[i]);
-		string word;
-		while (in >> word) {
-            if (keywords.find(word) != keywords.end())
-                formattedText.push_back(word);
-            else if (isNumber(word)) {
-                /*istringstream in(word);
-                double num;
-                in >> num;
-
-                ostringstream out;
-                out.setf(ios::scientific);
-                out << num;
-
-                formattedText.push_back(out.str());*/
-                formattedText.push_back(word);
-            }
-            else if (isIdentifier(word))
-                formattedText.push_back("id");
-            else
-                formattedText.push_back(word);
-
-
-            //fout << formattedText.back() << " ";
-        }
-        //fout << endl;
+    istringstream in(oneLineText);
+    string word;
+    while (in >> word) {
+        if (keywords.find(word) != keywords.end())
+            formattedText.push_back(word);
+        else if (typewords.find(word) != typewords.end() && isIdentifier(word))
+            formattedText.push_back("type");
+        else if (isNumber(word))
+            formattedText.push_back(word);
+        else if (isIdentifier(word))
+            formattedText.push_back("id");
+        else
+            formattedText.push_back(word);
     }
 
     return formattedText;
