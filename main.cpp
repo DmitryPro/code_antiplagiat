@@ -291,7 +291,7 @@ void readTypewords(set<string>& typewords) {
     typewords.insert("deque");
     typewords.insert("std");
     typewords.insert(",");
-    typewords.insert(":");
+    //typewords.insert(":");
     typewords.insert("*");
     typewords.insert("&");
     typewords.insert("[");
@@ -300,6 +300,27 @@ void readTypewords(set<string>& typewords) {
     typewords.insert(">");
     typewords.insert("class");
     typewords.insert("typename");
+    typewords.insert("template");
+    typewords.insert("Integer");
+    typewords.insert("Boolean");
+    typewords.insert("String");
+    typewords.insert("Character");
+    typewords.insert("Short");
+    typewords.insert("Long");
+    typewords.insert("BigInteger");
+    typewords.insert("BigDecimal");
+    typewords.insert("List");
+    typewords.insert("ArrayList");
+    typewords.insert("Vector");
+    typewords.insert("Stack");
+    typewords.insert("LinkedList");
+    typewords.insert("Deque");
+    typewords.insert("Queue");
+    typewords.insert("Set");
+    typewords.insert("HashSet");
+    typewords.insert("SortedSet");
+    typewords.insert("TreeSet");
+    typewords.insert("LinkedHashSet");
 }
 
 long long hashFunction(const vector<int>& v) {
@@ -549,21 +570,23 @@ int main(int argc, char* argv[]) {
     set<string> keywords;
 	readKeywords(keywords);
 	set<string> typewords;
-	readKeywords(typewords);
+	readTypewords(typewords);
 
     vector<string> text;
-    fin.open("test/05/8576.cpp");
+    fin.open("HelloWorld.cpp");
     readText(fin, text);
     fin.close();
 
+
 ofstream fout("output.txt");
-    vector<string> formattedText = formatText(text, "test/05/8576.cpp", keywords, typewords);
+    vector<string> formattedText = formatText(text, "HelloWorld.cpp", keywords, typewords);
+cout << formattedText.size();
     for (auto s : formattedText)
         fout << s << ' ';
 
     return 0;*/
 
-    /*string prefix = argv[1];
+   /* string prefix = argv[1];
     sscanf(argv[2], "%lf", &secondHeuristicsConst);
     sscanf(argv[3], "%lf", &thirdHeuristicsConst);
     sscanf(argv[4], "%lf", &fourthHeuristicsConst);
@@ -571,14 +594,14 @@ ofstream fout("output.txt");
     sscanf(argv[6], "%d", &secondWidthConst);
     sscanf(argv[7], "%d", &minLengthConst);*/
 
-    secondHeuristicsConst = 0.312893;
-    thirdHeuristicsConst = 0.326933;
-    fourthHeuristicsConst = 0.75;
-    firstWidthConst = 6;
-    secondWidthConst = 6;
-    minLengthConst = 10;
+    secondHeuristicsConst = 0.225145;
+    thirdHeuristicsConst = 0.240188;
+    fourthHeuristicsConst = 0.760000;
+    firstWidthConst = 8;
+    secondWidthConst = 12;
+    minLengthConst = 26;
     string prefix = "";
-    //string prefix = "test/02/";
+    //string prefix = "test/07/";
 
     double startTime = clock();
 
@@ -639,20 +662,8 @@ ofstream fout("output.txt");
                 if ((currentTime - startTime) / CLOCKS_PER_SEC > 28)
                     isPlagiat = secondHeuristics(fingerprints[i], fingerprints[j]);
                 else {
-                    bool h3 = thirdHeuristics(hashSequences[i], hashSequences[j]);
-                    if (!h3)
-                        isPlagiat = false;
-                    else {
-                        bool h2 = secondHeuristics(fingerprints[i], fingerprints[j]);
-                        if (h2)
-                            isPlagiat = true;
-                        else
-                            isPlagiat = false;
-                        /*else {
-                            bool h4 = fourthHeuristics(hashSequences[i], hashSequences[j]);
-                            isPlagiat = h4;
-                        }*/
-                    }
+                    isPlagiat = secondHeuristics(fingerprints[i], fingerprints[j]) &&
+                                thirdHeuristics(hashSequences[i], hashSequences[j]);
                 }
 
                 if (isPlagiat) {

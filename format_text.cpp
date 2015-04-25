@@ -23,9 +23,9 @@ bool isIdentifier(const string& word) {
         if (!(((word[i] >= '0') && (word[i] <= '9')) ||
               ((word[i] >= 'a') && (word[i] <= 'z')) ||
               ((word[i] >= 'A') && (word[i] <= 'Z')) ||
-              word[i] == '_'))
+              word[i] == '_' || word[i] == '.'))
             flag = false;
-    if ((word[0] >= '0') && (word[0] <= '9'))
+    if (((word[0] >= '0') && (word[0] <= '9')) || (word[0] == '.'))
         flag = false;
     return flag;
 }
@@ -35,21 +35,34 @@ bool isNumber(const string& word) {
     for (size_t i = 0; i < word.length(); i++)
         if (!(((word[i] >= '0') && (word[i] <= '9')) ||
               ((word[i] >= 'a') && (word[i] <= 'z')) ||
-              ((word[i] >= 'A') && (word[i] <= 'Z'))))
+              ((word[i] >= 'A') && (word[i] <= 'Z')) ||
+                word[i] == '.'))
             flag = false;
-    if (!((word[0] >= '0') && (word[0] <= '9')))
+    if (!(((word[0] >= '0') && (word[0] <= '9')) || (word[0] == '.')))
         flag = false;
     return flag;
 }
 
-void deleteStrangeSymbols(vector<string>& text) {
-    for (size_t i = 0; i < text.size(); i++) {
-       string newLine = "";
-       for (size_t j = 0; j < text[i].size(); j++)
-            if (32 <= text[i][j] && 128 > text[i][j])
-                newLine += text[i][j];
-        text[i] = newLine;
+void deleteAllBeforePoint(string& text) {
+    istringstream in(text);
+    string word;
+
+    string newText = "";
+    while (in >> word) {
+        if (isIdentifier(word))
+            while (word.find('.') != string::npos)
+                word.erase(0, word.find('.') + 1);
+        newText += " " + word + " ";
     }
+    text = newText;
+}
+
+void deleteStrangeSymbols(string& text) {
+    string newLine = "";
+    for (size_t i = 0; i < text.length(); i++)
+        if (32 <= text[i] && 128 > text[i])
+            newLine += text[i];
+    text = newLine;
 }
 
 void deleteDirectives(vector<string>& text) {
@@ -62,66 +75,62 @@ void deleteDirectives(vector<string>& text) {
     }
 }
 
-void deleteTypedefs(vector<string>& text) {
-    for (size_t i = 0; i < text.size(); i++) {
-		istringstream in(text[i]);
-		string word;
+void deleteTypedefs(string& text, const set<string>& typewords) {
+    istringstream in(text);
+    string word;
 
-		ostringstream out;
-		while (in >> word) {
-            if (word == "typedef") {
-                vector<string> words;
+    ostringstream out;
+    while (in >> word) {
+        if (word == "typedef") {
+            vector<string> words;
 
-                while ((in >> word) && (word != ";"))
-                    words.push_back(word);
+            while ((in >> word) && (word != ";"))
+                words.push_back(word);
 
-                bool isCorrect = true;
+            bool isCorrect = true;
 
-                if (word != ";")
+            if (word != ";")
+                isCorrect = false;
+
+            if (words.size() < 2)
+                isCorrect = false;
+
+            if (words.size() > 15)
+                isCorrect = false;
+
+            //if (words.back().length() == 1)
+                isCorrect = false;
+
+            for (int j = 0; j < words.size() - 1; j++)
+                if (typewords.find(words[j]) == typewords.end())
                     isCorrect = false;
 
-                if (words.size() < 2)
-                    isCorrect = false;
+            if (!isIdentifier(words.back()))
+                isCorrect = false;
 
-                if (words.size() > 15)
-                    isCorrect = false;
+            if (isCorrect) {
+                string a = " ";
+                for (size_t j = 0; j < words.size() - 1; j++)
+                    a += words[j] + " ";
+                string b = " " + words.back() + " ";
 
-                if (words.back().length() == 1)
-                    isCorrect = false;
+                if (a.find(b) != string::npos)
+                    break;
 
-               /* for (int j = 0; j < words.size() - 1; j++)
-                    if (words[j] != "int" && words[j] != "char" && words[j] != "long" && words[j] != "bool" &&
-                        words[j] != "short" && words[j] != "unsigned" && words[j] != "float" && words[j] != "double" &&
-                        words[j] != "<" && words[j] != ">" && words[j] != ",")
-                        isCorrect = false;*/
-
-                if (!isIdentifier(words.back()))
-                    isCorrect = false;
-
-                if (isCorrect) {
-                    string a = " ";
-                    for (size_t j = 0; j < words.size() - 1; j++)
-                        a += words[j] + " ";
-                    string b = " " + words.back() + " ";
-
-                    if (a.find(b) != string::npos)
-                        break;
-
-                    replaceNames(text, b, a);
-                }
-                else {
-                    out << "typedef ";
-                    for (size_t j = 0; j < words.size(); j++)
-                        out << words[j] << " ";
-                    out << word << " ";
-                }
+                replaceNames(text, b, a);
             }
-            else
+            else {
+                out << " typedef ";
+                for (size_t j = 0; j < words.size(); j++)
+                    out << words[j] << " ";
                 out << word << " ";
+            }
         }
-
-        text[i] = " " + out.str();
+        else
+            out << word << " ";
     }
+
+    text = " " + out.str();
 }
 
 void deleteComments(vector<string>& text) {
@@ -159,23 +168,21 @@ void deleteComments(vector<string>& text) {
 	}
 }
 
-void insertSpaces(vector<string>& text) {
-	for (size_t i = 0; i < text.size(); i++) {
-		string newLine = " ";
-		for (size_t j = 0; j < text[i].length(); j++) {
-			if (! ( ((text[i][j] >= '0') && (text[i][j] <= '9')) ||
-					((text[i][j] >= 'a') && (text[i][j] <= 'z')) ||
-					((text[i][j] >= 'A') && (text[i][j] <= 'Z')) ||
-					text[i][j] == '_')) {
-				newLine += " ";
-				newLine += text[i][j];
-				newLine += " ";
-			}
-			else
-				newLine += text[i][j];
-		}
-		text[i] = newLine + " ";
-	}
+void insertSpaces(string& text) {
+    string newLine = " ";
+    for (size_t i = 0; i < text.length(); i++) {
+        if (! ( ((text[i] >= '0') && (text[i] <= '9')) ||
+                ((text[i] >= 'a') && (text[i] <= 'z')) ||
+                ((text[i] >= 'A') && (text[i] <= 'Z')) ||
+                text[i] == '_'/* || text[i] == '.'*/)) {
+            newLine += " ";
+            newLine += text[i];
+            newLine += " ";
+        }
+        else
+            newLine += text[i];
+    }
+    text = newLine + " ";
 }
 
 void deleteSpaces(string& text) {
@@ -203,17 +210,16 @@ void deleteSemicolons(string& text) {
     text = newLine;
 }
 
-void replaceNames(vector<string>& text, const string& a, const string& b) {
-    for (size_t i = 0; i < text.size(); i++)
-        while (text[i].find(a) != string::npos)
-            text[i].replace(text[i].find(a), a.length(), b);
+void replaceNames(string& text, const string& a, const string& b) {
+    while (text.find(a) != string::npos)
+        text.replace(text.find(a), a.length(), b);
 }
 
 void addTypewords(string& text, set<string>& typewords) {
     istringstream in(text);
     string word;
     while (in >> word) {
-        if (word == "struct" || word == "class" || word == "enum") {
+        if (word == "struct" || word == "class" || word == "enum" || word == "typename") {
             in >> word;
             typewords.insert(word);
         }
@@ -250,6 +256,10 @@ vector<Function> findFunctions(string& text, const set<string>& typewords) {
                 if (isIdentifier(word)) {
                     f.name = word;
                     s = NAME;
+                }
+                else if (word == "(") {
+                    f.name = "__CONSTRUCTOR__";
+                    s = BRACE_1;
                 }
                 else
                     s = START;
@@ -334,6 +344,10 @@ vector<bool> findUsedFunctions(const vector<Function>& functions) {
                 }
     }
 
+    for (size_t i = 0; i < functions.size(); i++)
+        if (functions[i].name == "__CONSTRUCTOR__")
+            used[i] = true;
+
     return used;
 }
 
@@ -346,37 +360,53 @@ vector<string> formatText(vector<string> text, string fileName,
 	if (l == CPP || l == C || l == CS)
         deleteDirectives(text);
 
-	deleteStrangeSymbols(text);
-
-	insertSpaces(text);
-	for (size_t i = 0; i < text.size(); i++)
-        deleteSpaces(text[i]);
-
-    if (l == CPP || l == JAVA || l == CS || l == C) {
-        replaceNames(text, " unsigned long long ", " int ");
-        replaceNames(text, " unsigned long int ",  " int ");
-        replaceNames(text, " long int ",           " int ");
-        replaceNames(text, " long long ",          " int ");
-        replaceNames(text, " unsigned int ",       " int ");
-        replaceNames(text, " unsigned long ",      " int ");
-        replaceNames(text, " unsigned ",           " int ");
-        replaceNames(text, " long ",               " int ");
-        replaceNames(text, " short ",              " int ");
-        replaceNames(text, " size_t ",             " int ");
-        replaceNames(text, " float ",           " double ");
-        replaceNames(text, " long double ",     " double ");
-    }
-    if (l == CPP || l == C)
-        deleteTypedefs(text);
-
     string oneLineText = "";
 	for (size_t i = 0; i < text.size(); i++)
         oneLineText += text[i];
 
-    addTypewords(oneLineText, typewords);
+	deleteStrangeSymbols(oneLineText);
+
+	deleteAllBeforePoint(oneLineText);
+
+	insertSpaces(oneLineText);
+    deleteSpaces(oneLineText);
+
+    if (l == CPP || l == JAVA || l == CS || l == C) {
+        replaceNames(oneLineText, " unsigned long long ", " int ");
+        replaceNames(oneLineText, " unsigned long int ",  " int ");
+        replaceNames(oneLineText, " long int ",           " int ");
+        replaceNames(oneLineText, " long long ",          " int ");
+        replaceNames(oneLineText, " unsigned int ",       " int ");
+        replaceNames(oneLineText, " unsigned long ",      " int ");
+        replaceNames(oneLineText, " unsigned ",           " int ");
+        replaceNames(oneLineText, " long ",               " int ");
+        replaceNames(oneLineText, " short ",              " int ");
+        replaceNames(oneLineText, " size_t ",             " int ");
+        replaceNames(oneLineText, " float ",           " double ");
+        replaceNames(oneLineText, " long double ",     " double ");
+        replaceNames(oneLineText, " public ",                 " ");
+        replaceNames(oneLineText, " private ",                " ");
+        replaceNames(oneLineText, " protected ",              " ");
+        replaceNames(oneLineText, " static ",                 " ");
+        replaceNames(oneLineText, " volatile ",               " ");
+        replaceNames(oneLineText, " virtual ",                " ");
+        replaceNames(oneLineText, " abstract ",               " ");
+        replaceNames(oneLineText, " inline ",                 " ");
+        replaceNames(oneLineText, " std : : ",                " ");
+        replaceNames(oneLineText, " : : ",                    " ");
+    }
+
+    //addTypewords(oneLineText, typewords);
+
+    //if (l == CPP || l == C)
+    //    deleteTypedefs(oneLineText, typewords);
+
+    vector<Function> functions = findFunctions(oneLineText, typewords);
+    set<string> functionNames;
+    for (size_t i = 0; i < functions.size(); i++)
+        functionNames.insert(functions[i].name);
 
     if (l == CPP || l == C || l == JAVA) {
-        vector<Function> functions = findFunctions(oneLineText, typewords);
         vector<bool> used = findUsedFunctions(functions);
 
         int end = oneLineText.length();
@@ -388,25 +418,6 @@ vector<string> formatText(vector<string> text, string fileName,
                 oneLineText.erase(functions[i].begin, functions[i].end - functions[i].begin);
         }
         oneLineText.erase(0, end);
-
-        /*for (size_t i = 0; i < functions.size(); i++) {
-            vector<string> tmp(1, functions[i].body);
-
-            replaceNames(tmp, functions[i].name, "");
-            functions[i].body = tmp[0];
-
-            for (size_t j = 0; j < functions.size(); j++)
-                if (i != j) {
-                    vector<string> tmp(1, functions[j].body);
-                    replaceNames(tmp, functions[i].name, functions[i].body);
-                    functions[j].body = tmp[0];
-                }
-        }
-
-        oneLineText = "";
-        for (size_t i = 0; i < functions.size(); i++)
-            if (functions[i].name == "main")
-                oneLineText = functions[i].body;*/
     }
 
 	deleteBraces(oneLineText);
@@ -420,10 +431,13 @@ vector<string> formatText(vector<string> text, string fileName,
     while (in >> word) {
         if (keywords.find(word) != keywords.end())
             formattedText.push_back(word);
+        else if (functionNames.find(word) != functionNames.end())
+            formattedText.push_back("func");
         else if (typewords.find(word) != typewords.end() && isIdentifier(word))
             formattedText.push_back("type");
         else if (isNumber(word))
-            formattedText.push_back(word);
+            //formattedText.push_back(word);
+            formattedText.push_back("number");
         else if (isIdentifier(word))
             formattedText.push_back("id");
         else
