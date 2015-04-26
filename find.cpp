@@ -40,8 +40,8 @@ double calculateScore() {
 			while (in >> fileName)
 				fileNames.push_back(fileName);
 			
-			for (int u = 0; u < fileNames.size(); u++)
-				for (int v = u + 1; v < fileNames.size(); v++) {
+			for (size_t u = 0; u < fileNames.size(); u++)
+				for (size_t v = u + 1; v < fileNames.size(); v++) {
 					rightPairs.insert(make_pair(fileNames[u], fileNames[v]));
 					rightPairs.insert(make_pair(fileNames[v], fileNames[u]));
 				}
@@ -67,8 +67,8 @@ double calculateScore() {
 			while (in >> fileName)
 				fileNames.push_back(fileName);
 			
-			for (int u = 0; u < fileNames.size(); u++)
-				for (int v = u + 1; v < fileNames.size(); v++) {
+			for (size_t u = 0; u < fileNames.size(); u++)
+				for (size_t v = u + 1; v < fileNames.size(); v++) {
 					myPairs.insert(make_pair(fileNames[u], fileNames[v]));
 					myPairs.insert(make_pair(fileNames[v], fileNames[u]));
 				}
@@ -83,9 +83,12 @@ double calculateScore() {
 				break;
 			}
 		
-		if (flag)
+		if (flag) {
+			cout << 0 << endl;
 			continue;
+		}
 		
+		cout << 100.0 * myPairs.size() / rightPairs.size() << endl;
 		score += 100.0 * myPairs.size() / rightPairs.size();
 	}
 	
@@ -96,40 +99,42 @@ double calculateScore() {
 int main() {
 	srand(clock());
 	
-	vector< pair<double, double*> > all(100);
+	vector< pair<double, double*> > all(1000);
 	
-	for (int k = 0; k < 100; k++) {
-		double cur[4];
-		cur[0] = 0.8 * rand() / RAND_MAX + 0.2;
-		cur[1] = 0.8 * rand() / RAND_MAX + 0.2;
-		cur[2] = rand() % 40 + 1;
-		cur[3] = rand() % 40 + 1;
+	for (int k = 0; k < 10; k++) {
+		double cur[5];
+		cur[0] = 0.2 * rand() / RAND_MAX + 0.2;
+		cur[1] = 0.2 * rand() / RAND_MAX + 0.2;
+		cur[2] = rand() % 10 + 3;
+		cur[3] = rand() % 20 + 1;
+		cur[4] = rand() % 20 + 10;
 		
-		#pragma omp parallel for
+		//#pragma omp parallel for
 		for (int i = 0; i < 10; i++) {
 			
 			char command[100];
-			sprintf(command, "./antiplagiat test/%02d/ %lf %lf %d %d", i + 1, cur[0], cur[1], (int)cur[2], (int)cur[3]);
+			sprintf(command, "./antiplagiat test/%02d/ %lf %lf %d %d %d", i + 1, 
+						cur[0], cur[1], (int)(cur[2] + 0.5), (int)(cur[3] + 0.5), (int)(cur[4] + 0.5));
 			cout << command << endl;
 			system(command);
 		}
 		
 		double score = calculateScore();
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 			cout << cur[i] << ' ';
 		cout << endl;
 		cout << score << endl;
 		
 		all[k].first = -score;
-		all[k].second = new double[4];
-		for (int j = 0; j < 4; j++)
+		all[k].second = new double[5];
+		for (int j = 0; j < 5; j++)
 			all[k].second[j] = cur[j];
 	}
 	
 	sort(all.begin(), all.end());
 	
 	cout << all[0].first << endl;
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 		cout << all[0].second[i] << ' ';
 	cout << endl;
 	

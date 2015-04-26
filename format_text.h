@@ -6,7 +6,7 @@ using namespace std;
 
 enum Languages { CPP, C, CS, PY, PAS, JAVA, EXOTIC };
 
-enum States { START, TYPENAME, NAME, BRACE_1, BRACE_2, BRACE_3, FINISH };
+enum States { START, NAME, BRACE_1, BRACE_2, BRACE_3, FINISH };
 
 struct Function {
     int begin, end;
@@ -20,14 +20,10 @@ bool isNumber(const string& word);
 void addTypewords(string& text, set<string>& typewords);
 vector<Function> findFunctions(string& text, const set<string>& typewords);
 vector<bool> findUsedFunctions(const vector<Function>& functions);
-void deleteAllBeforePoint(string& text);
-void deleteFunctions(string& text, const vector<Function>& functions);
 void deleteStrangeSymbols(string& text);
 void deleteComments(vector<string>& text);
 void deleteDirectives(vector<string>& text);
-void deleteBraces(string& text);
-void deleteSemicolons(string& text);
-void deleteTypedefs(string& text, const set<string>& typewords);
+void deleteTypedefs(string& text, set<string>& typewords);
 void replaceNames(string& text, const string& a, const string& b);
 void insertSpaces(string& text);
 void deleteSpaces(string& text);

@@ -1,3 +1,11 @@
+/**
+http://rain.ifmo.ru/cat/data/theory/unsorted/plagiarism-2006/article.pdf
+Используется метод отпечатков - second heuristics
+и жадное строковое замощение - third heuristics
+Метод на основе Колмогоровской сложности (fourth heuristics) плохо реализован и не используется
+Метод на основе наибольшей общей подпоследовательности (first heuristics) ужасен и не используется
+*/
+
 #include "headers.h"
 
 double firstHeuristicsConst;
@@ -452,7 +460,7 @@ int gst(const vector<int>& a, const vector<int>& b) {
             }
 
         if (matches.size() == 0) {
-            if (l == minLength)
+            if (l <= minLength)
                 break;
             l = (l + 4 * minLength) / 5;
         }
@@ -505,7 +513,7 @@ vector<int> zf(const vector<int>& s) {
     return z;
 }
 
-int tokenCompress(const vector<int>& a, const vector<int>& b = vector<int>()) {
+int tokenCompress(const vector<int>& a, const vector<int>& b = vector<int>()) {   /// Плохо реализовано
     vector<int> s = a;
     s.push_back(-1);
     s.insert(s.end(), b.begin(), b.end());
@@ -536,14 +544,12 @@ int tokenCompress(const vector<int>& a, const vector<int>& b = vector<int>()) {
     return length;
 }
 
-bool firstHeuristics(const vector<int>& a, const vector<int>& b) {
-return true;
+bool firstHeuristics(const vector<int>& a, const vector<int>& b) {   /// Плохо работает
     int len = lcs(a, b);
     return ((double)len) / (a.size() + b.size() - len) > firstHeuristicsConst;
 }
 
 bool secondHeuristics(const set<int>& a, const set<int>& b) {
-//return true;
     int count = 0;
     for (set<int>::iterator it = a.begin(); it != a.end(); it++)
         if (b.find(*it) != b.end())
@@ -552,12 +558,11 @@ bool secondHeuristics(const set<int>& a, const set<int>& b) {
 }
 
 bool thirdHeuristics(const vector<int>& a, const vector<int>& b) {
-//return true;
     int len = gst(a, b);
     return ((double)len) / (a.size() + b.size() - len) > thirdHeuristicsConst;
 }
 
-bool fourthHeuristics(const vector<int>& a, const vector<int>& b) {
+bool fourthHeuristics(const vector<int>& a, const vector<int>& b) {    /// Плохо реализовано
     vector<int> c = a;
     c.insert(c.end(), b.begin(), b.end());
     return (0.0L + tokenCompress(a) - tokenCompress(a, b)) / tokenCompress(c) > fourthHeuristicsConst;
@@ -565,43 +570,19 @@ bool fourthHeuristics(const vector<int>& a, const vector<int>& b) {
 
 int main(int argc, char* argv[]) {
 
-    /*ifstream fin;
-
-    set<string> keywords;
-	readKeywords(keywords);
-	set<string> typewords;
-	readTypewords(typewords);
-
-    vector<string> text;
-    fin.open("HelloWorld.cpp");
-    readText(fin, text);
-    fin.close();
-
-
-ofstream fout("output.txt");
-    vector<string> formattedText = formatText(text, "HelloWorld.cpp", keywords, typewords);
-cout << formattedText.size();
-    for (auto s : formattedText)
-        fout << s << ' ';
-
-    return 0;*/
-
-   /* string prefix = argv[1];
+    string prefix = argv[1];
     sscanf(argv[2], "%lf", &secondHeuristicsConst);
     sscanf(argv[3], "%lf", &thirdHeuristicsConst);
-    sscanf(argv[4], "%lf", &fourthHeuristicsConst);
-    sscanf(argv[5], "%d", &firstWidthConst);
-    sscanf(argv[6], "%d", &secondWidthConst);
-    sscanf(argv[7], "%d", &minLengthConst);*/
+    sscanf(argv[4], "%d", &firstWidthConst);
+    sscanf(argv[5], "%d", &secondWidthConst);
+    sscanf(argv[6], "%d", &minLengthConst);
 
-    secondHeuristicsConst = 0.225145;
-    thirdHeuristicsConst = 0.240188;
-    fourthHeuristicsConst = 0.760000;
-    firstWidthConst = 8;
-    secondWidthConst = 12;
-    minLengthConst = 26;
-    string prefix = "";
-    //string prefix = "test/07/";
+    /*secondHeuristicsConst = 0.37;
+    thirdHeuristicsConst = 0.37;
+    firstWidthConst = 5;
+    secondWidthConst = 10;
+    minLengthConst = 15;
+    string prefix = "";*/
 
     double startTime = clock();
 
@@ -655,7 +636,6 @@ cout << formattedText.size();
 
         for (int j = i + 1; j < n; j++)
             if (used.find(j) == used.end()) {
-                //bool h1 = firstHeuristics(hashSequences[i], hashSequences[j]);
                 double currentTime = clock();
                 bool isPlagiat = false;
 
