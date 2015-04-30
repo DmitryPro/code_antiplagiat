@@ -16,6 +16,7 @@ int firstWidthConst;
 int secondWidthConst;
 int minLengthConst;
 
+// Получение из файла vector<string>
 void readText(istream& in, vector<string>& text) {
 	text.clear();
 
@@ -30,6 +31,7 @@ void readText(istream& in, vector<string>& text) {
     }
 }
 
+//Внесение ключевых слов в словарь
 void readKeywords(set<string>& keywords) {
     keywords.clear();
 
@@ -274,6 +276,7 @@ void readKeywords(set<string>& keywords) {
     keywords.insert("yield");
 }
 
+//Внесение в словарь слов , которые могут находиться перед процедурами или функциями
 void readTypewords(set<string>& typewords) {
     typewords.clear();
 
@@ -331,6 +334,7 @@ void readTypewords(set<string>& typewords) {
     typewords.insert("LinkedHashSet");
 }
 
+// Хэш
 long long hashFunction(const vector<int>& v) {
     long long Hash = 0;
     for(size_t i = 0; i < v.size(); i++)
@@ -368,6 +372,7 @@ set<int> makeFingerprint(vector<int> hashSequence) {
     return fingerprint;
 }
 
+//Создние хэш таблицы
 void createHashTable(const vector<int>& a, const vector<int>& b, int l,
                      vector< unordered_map< int, vector<int> > >& hashTable) {
     long long p = 1000000007;
@@ -404,6 +409,7 @@ void createHashTable(const vector<int>& a, const vector<int>& b, int l,
     }
 }
 
+// Длинна общего префикса
 int commonPrefixLength(const vector<int>& a, const vector<int>& b,
                        const vector< vector<bool> >& marked, size_t i, size_t j) {
     int prefixLength = 0;
@@ -420,6 +426,7 @@ void mark(vector< vector<bool> >& marked, int i, int j, int length) {
         marked[0][i + k] = marked[1][j + k] = true;
 }
 
+//Замощение
 int gst(const vector<int>& a, const vector<int>& b) {
     int commonPartLength = 0;
     int minLength = minLengthConst;
@@ -469,6 +476,7 @@ int gst(const vector<int>& a, const vector<int>& b) {
     return commonPartLength;
 }
 
+// НОП
 int lcs(const vector<int>& a, const vector<int>& b) {
     int n = a.size() + 1;
     int m = b.size() + 1;
@@ -497,6 +505,7 @@ int lcs(const vector<int>& a, const vector<int>& b) {
     return ans;
 }
 
+// Z - функция
 vector<int> zf(const vector<int>& s) {
     vector<int> z(s.size());
     z[0] = 0;
@@ -513,6 +522,7 @@ vector<int> zf(const vector<int>& s) {
     return z;
 }
 
+//Колмогоровская сложность
 int tokenCompress(const vector<int>& a, const vector<int>& b = vector<int>()) {   /// Плохо реализовано
     vector<int> s = a;
     s.push_back(-1);
@@ -549,6 +559,7 @@ bool firstHeuristics(const vector<int>& a, const vector<int>& b) {   /// Пло�
     return ((double)len) / (a.size() + b.size() - len) > firstHeuristicsConst;
 }
 
+//Отпечатки
 bool secondHeuristics(const set<int>& a, const set<int>& b) {
     int count = 0;
     for (set<int>::iterator it = a.begin(); it != a.end(); it++)
@@ -583,7 +594,9 @@ int main(int argc, char* argv[]) {
     secondWidthConst = 10;
     minLengthConst = 15;
     string prefix = "";*/
-
+	
+	
+	// Так как на контесте было ограничение по времени , то делались отсечения
     double startTime = clock();
 
     ifstream fin((prefix + "input.txt").c_str());
